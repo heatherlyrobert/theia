@@ -1,0 +1,2 @@
+# theia
+terminal color configuration
