@@ -1,0 +1,100 @@
+.TH s 1 2014-Jan "linux" "heatherly custom tools manual"
+
+.SH NAME
+theia euryphaessa (wide-shinning) \- interactive terminal configurator
+
+.SH SYNOPSIS
+.B theia [URGENTS] [OPTIONS] [ARGUMENTS]
+
+.SH DESCRIPTION (short)
+theia is my configurator for terminal windows, including eterm, my primary
+coding environment.  her goal is to provide a quick method to beaufifully match
+eterm transparent background color and terminal font colors with the desktop
+environment.
+
+.SH URGENTS
+
+.B @@log
+begins logging to the standard system directory and sets @@tops.  without
+specifying @@log, no other urgents will have an effect.
+
+.B @t, @@tops
+logs program structure entering and exiting major functions
+
+.B @c, @@args
+logs processing command line arguments and urgents
+
+.B @f, @@file
+logs reading the input file theia.schemes
+
+.B @g, @@graf
+logs setting termintal font and background colors
+
+.B @o, @@outp
+logs modifying environment vars to store terminal config
+
+.B @p, @@proc
+logs the processing handling of terminal information
+
+.SH OPTIONS
+
+.B -w, --wide
+prints a 240 column color report
+
+.B -n, --narrow
+prints a 140 column color report
+
+.B -t, --tiny
+prints a 80 column color report
+
+.B -b, --backs
+prints a list of options for back colors
+
+.B -r, --runtime
+prints a list of known terminals and settings
+
+.SH ARGUMENTS
+
+.B <c>
+single character [a-z] which is short-hand for a transparent eterm background
+color.
+
+.B <xx>
+two digit hex id which is short-hand for a font color theme from the file
+theia.schemes.
+
+.B <xxxxxx>
+six digit hex color code which directly sets the transparent eterm background
+color.
+
+.SH FILES
+
+.I /proc/
+.RS 3
+theia uses the proc filesystem to locate eterm/hearth pid's
+.RE
+
+.I /var/log/yLOG/theia.ttys
+.RS 3
+contains the current settings for known terminals
+.RE
+
+.I /home/system/theia.xwin_terminal_configurator/theia.schemes
+.RS 3
+contains the options for backgound tints and font color themes
+.RE
+
+.SH HERITAGE
+theia euryphaessa (wide-shinning) is one of the twelve greek titans and
+titaness of sight and the light of the clear blue sky.  she is the consort
+of hyperion and mother to helios (sun), selene (moon), and eos (dawn).
+she is the goddess who endowed gold, silver, and gems with their
+brilliance and intrinsic value.
+
+.SH AUTHOR
+heatherly
+
+.SH COLOPHON
+this page is part of a documentation package mean to make the use of the
+heatherly tools easier and faster
+
