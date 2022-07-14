@@ -29,8 +29,8 @@
 
 #define     P_VERMAJOR  ""
 #define     P_VERMINOR  ""
-#define     P_VERNUM    "0.6b"
-#define     P_VERTXT    "new reporting format (--every) to better show constrasts"
+#define     P_VERNUM    "0.6d"
+#define     P_VERTXT    "more color tweaking ;) and conf file"
 
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -123,16 +123,16 @@
 /*===[[ DE-FACTO STANDARD LIBRARIES ]]========================================*/
 #include    <ncurses.h>      /* CURSES : mvprintw, refresh, getch, ...        */
 
-/*===[[ CUSTOM LIBRARIES ]]===================================================*/
-#include    <yLOG.h>         /* CUSTOM : heatherly program logging            */
-#include    <ySTR.h>         /* CUSTOM : heatherly string handling            */
+/*---(custom core)-----------------------*/
+#include    <yURG.h>              /* heatherly urgent processing              */
+#include    <yLOG.h>              /* heatherly program logging                */
+#include    <ySTR.h>              /* heatherly string processing              */
 
 
 
 
 
 
-#define     MAX_STR        2000
 
 
 #define     MAX_SCHEME      200
@@ -143,7 +143,8 @@ typedef     struct cTHEME   tTHEME;
 struct cTHEME {
    char        refno       [ 5];
    char        name        [50];
-   int         color       [MAX_ENTRIES];
+   char        style;
+   int         hex         [MAX_ENTRIES];
 };
 tTHEME      themes      [MAX_SCHEME];
 int         ntheme;
@@ -154,11 +155,11 @@ int         ntheme;
 typedef     struct cBACK     tBACK;
 struct cBACK {
    char        key;
-   char        abbr        [10];
-   char        cgroup      [50];
+   char        abbr        [LEN_TERSE];
+   char        color       [LEN_LABEL];
    char        name        [50];
    char        rgb         [50];
-   int         color;
+   int         hex;
 };
 tBACK       backs       [MAX_BACK];
 int         nback;
@@ -166,7 +167,7 @@ int         nback;
 
 
 typedef     struct cRUNTIME  tRUNTIME;
-#define     MAX_RUNTIME     200
+#define     MAX_RUNTIME     400
 #define     FILE_RUNTIME   "/var/run/theia.ttys"
 
 struct cRUNTIME {
@@ -183,14 +184,14 @@ int         nruntime;
 
 
 
-#define     MAX_TERM         10000
-typedef     struct cTERM     tTERM;
-struct cTERM {
-   int         pid;
-   int         term;
-};
-tTERM       terms       [MAX_TERM];
-int         nterm;
+/*> #define     MAX_TERM         10000                                                <* 
+ *> typedef     struct cTERM     tTERM;                                               <* 
+ *> struct cTERM {                                                                    <* 
+ *>    int         pid;                                                               <* 
+ *>    int         term;                                                              <* 
+ *> };                                                                                <* 
+ *> tTERM       terms       [MAX_TERM];                                               <* 
+ *> int         nterm;                                                                <*/
 
 
 
@@ -198,41 +199,41 @@ int         nterm;
 
 
 
+/*>                                                                                    <* 
+ *> /+===[[ DEBUGGING ]]==========================================================+/   <* 
+ *> typedef  struct cDEBUG  tDEBUG;                                                    <* 
+ *> struct cDEBUG {   /+ abcdefgiopstx +/                                              <* 
+ *>    /+---(standards)----------------------+/                                        <* 
+ *>    char        tops;                   /+ t) broad structure and context      +/   <* 
+ *>    char        args;                   /+ c) command line args and config     +/   <* 
+ *>    char        prep;                   /+ x) program setup and teardown       +/   <* 
+ *>    char        evnt;                   /+ e) event loop processing            +/   <* 
+ *>    char        file;                   /+ f) text and data file input         +/   <* 
+ *>    char        inpt;                   /+ i) interactive and keyboard input   +/   <* 
+ *>    char        data;                   /+ d) data storage and stuctures       +/   <* 
+ *>    char        proc;                   /+ p) data processing/manipulation     +/   <* 
+ *>    char        graf;                   /+ g) grahpics, drawing, and display   +/   <* 
+ *>    char        outp;                   /+ o) text and data file output        +/   <* 
+ *>    char        apis;                   /+ a) interprocess communication       +/   <* 
+ *>    char        scrp;                   /+ b) scripts and batch operations     +/   <* 
+ *>    char        summ;                   /+ s) statistics and analytical output +/   <* 
+ *>    /+---(special)------------------------+/                                        <* 
+ *> };                                                                                 <* 
+ *> tDEBUG      debug;         /+ primary debugging structure         +/               <*/
 
-/*===[[ DEBUGGING ]]==========================================================*/
-typedef  struct cDEBUG  tDEBUG;
-struct cDEBUG {   /* abcdefgiopstx */
-   /*---(standards)----------------------*/
-   char        tops;                   /* t) broad structure and context      */
-   char        args;                   /* c) command line args and config     */
-   char        prep;                   /* x) program setup and teardown       */
-   char        evnt;                   /* e) event loop processing            */
-   char        file;                   /* f) text and data file input         */
-   char        inpt;                   /* i) interactive and keyboard input   */
-   char        data;                   /* d) data storage and stuctures       */
-   char        proc;                   /* p) data processing/manipulation     */
-   char        graf;                   /* g) grahpics, drawing, and display   */
-   char        outp;                   /* o) text and data file output        */
-   char        apis;                   /* a) interprocess communication       */
-   char        scrp;                   /* b) scripts and batch operations     */
-   char        summ;                   /* s) statistics and analytical output */
-   /*---(special)------------------------*/
-};
-tDEBUG      debug;         /* primary debugging structure         */
-
-#define     DEBUG_TOPS          if (debug.tops      == 'y')
-#define     DEBUG_ARGS          if (debug.args      == 'y')
-#define     DEBUG_PREP          if (debug.prep      == 'y')
-#define     DEBUG_EVENT         if (debug.evnt      == 'y')
-#define     DEBUG_FILE          if (debug.file      == 'y')
-#define     DEBUG_INPUT         if (debug.inpt      == 'y')
-#define     DEBUG_DATA          if (debug.data      == 'y')
-#define     DEBUG_PROC          if (debug.proc      == 'y')
-#define     DEBUG_GRAPH         if (debug.graf      == 'y')
-#define     DEBUG_OUTPUT        if (debug.outp      == 'y')
-#define     DEBUG_APIS          if (debug.apis      == 'y')
-#define     DEBUG_SCRIPT        if (debug.scrp      == 'y')
-#define     DEBUG_SUMM          if (debug.summ      == 'y')
+/*> #define     DEBUG_TOPS          if (debug.tops      == 'y')                       <* 
+ *> #define     DEBUG_ARGS          if (debug.args      == 'y')                       <* 
+ *> #define     DEBUG_PREP          if (debug.prep      == 'y')                       <* 
+ *> #define     DEBUG_EVENT         if (debug.evnt      == 'y')                       <* 
+ *> #define     DEBUG_FILE          if (debug.file      == 'y')                       <* 
+ *> #define     DEBUG_INPUT         if (debug.inpt      == 'y')                       <* 
+ *> #define     DEBUG_DATA          if (debug.data      == 'y')                       <* 
+ *> #define     DEBUG_PROC          if (debug.proc      == 'y')                       <* 
+ *> #define     DEBUG_GRAPH         if (debug.graf      == 'y')                       <* 
+ *> #define     DEBUG_OUTPUT        if (debug.outp      == 'y')                       <* 
+ *> #define     DEBUG_APIS          if (debug.apis      == 'y')                       <* 
+ *> #define     DEBUG_SCRIPT        if (debug.scrp      == 'y')                       <* 
+ *> #define     DEBUG_SUMM          if (debug.summ      == 'y')                       <*/
 
 
 
