@@ -1,40 +1,46 @@
 /*===============================[[ beg code ]]===============================*/
 /*===[[ ONE_LINERS ]]=========================================================*/
-/*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-12345678901-12345678901-*/
-
+/*                      ´·········1·········2·········3·········4·········5·········6·········7*/
+/*--------- 12345678901 ´123456789-123456789-123456789-123456789-123456789-123456789-123456789-*/
+/*········· ··········· ´·····························´········································*/
 #define     P_FOCUS     "WM (window_manager)"
 #define     P_NICHE     "tc (terminal_configuration)"
 #define     P_SUBJECT   "terminal color configuration"
 #define     P_PURPOSE   "interactive configuration for terminal windows"
-
+/*········· ··········· ´·····························´········································*/
 #define     P_NAMESAKE  "theia-euryphaessa (wide-shinning)"
-#define     P_HERITAGE  ""
+#define     P_PRONOUCE  "thee·uh yur·ee·fray·shee·uh"
+#define     P_HERITAGE  "goddess of sight and the light of the clear blue sky"
+#define     P_BRIEFLY   "light of the clear blue sky"
 #define     P_IMAGERY   ""
-#define     P_REASON    ""
-
+#define     P_REASON    "the goddess of light and sky makes my environment beautiful"
+/*········· ··········· ´·····························´········································*/
 #define     P_ONELINE   P_NAMESAKE " " P_SUBJECT
-
-#define     P_BASENAME  ""
-#define     P_FULLPATH  ""
-#define     P_SUFFIX    ""
-#define     P_CONTENT   ""
-
+/*········· ··········· ´·····························´········································*/
+#define     P_BASENAME  "theia"
+#define     P_FULLPATH  "/usr/local/bin/theia"
+#define     P_SUFFIX    "···"
+#define     P_CONTENT   "···"
+/*········· ··········· ´·····························´········································*/
 #define     P_SYSTEM    "gnu/linux   (powerful, ubiquitous, technical, and hackable)"
 #define     P_LANGUAGE  "ansi-c      (wicked, limitless, universal, and everlasting)"
+#define     P_COMPILER  "gcc 5.3.0"
 #define     P_CODESIZE  "large       (appoximately 10,000 slocl)"
-#define     P_DEPENDS   "none"
-
+#define     P_DEPENDS   "ySTR,yEXEC"
+/*········· ··········· ´·····························´········································*/
 #define     P_AUTHOR    "heatherlyrobert"
 #define     P_CREATED   "2014-01"
-
-#define     P_VERMAJOR  ""
-#define     P_VERMINOR  ""
-#define     P_VERNUM    "0.6d"
-#define     P_VERTXT    "more color tweaking ;) and conf file"
-
+/*········· ··········· ´·····························´········································*/
+#define     P_VERMAJOR  "1.--, running every day in production"
+#define     P_VERMINOR  "1.0-, changed from hack to maintainable program."
+#define     P_VERNUM    "1.0b"
+#define     P_VERTXT    "added a ton of stuff, should not have waied this long"
+/*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
 #define     P_REMINDER  "there are many better options, but i *own* every byte of this one"
+/*········· ··········· ´·····························´········································*/
+/*--------- 12345678901 ´123456789-123456789-123456789-123456789-123456789-123456789-123456789-*/
 
 /*===[[ HEADER ]]============================================================*/
 
@@ -127,6 +133,9 @@
 #include    <yURG.h>              /* heatherly urgent processing              */
 #include    <yLOG.h>              /* heatherly program logging                */
 #include    <ySTR.h>              /* heatherly string processing              */
+#include    <yEXEC.h>        /* CUSTOM : heatherly process execution          */
+#include    <yDLST_solo.h>
+#include    <yX11.h>
 
 
 
@@ -135,119 +144,95 @@
 
 
 
-#define     MAX_SCHEME      200
+#define     MAX_FORE        200
 #define     MAX_ENTRIES      18
 #define     FILE_SCHEMES   "/etc/theia.conf"
 
-typedef     struct cTHEME   tTHEME;
-struct cTHEME {
-   char        refno       [ 5];
-   char        name        [50];
+typedef     struct cFORE    tFORE;
+struct cFORE {
+   char        refno       [LEN_TERSE];
+   char        name        [LEN_LABEL];
    char        style;
-   int         hex         [MAX_ENTRIES];
+   int         hex         [MAX_ENTRIES][LEN_TERSE];
+   int         value       [MAX_ENTRIES];
 };
-tTHEME      themes      [MAX_SCHEME];
-int         ntheme;
+extern tFORE  g_fores     [MAX_FORE];
+extern int    g_nfore;
+extern int    g_cfore;
 
 
 
 #define     MAX_BACK         200
 typedef     struct cBACK     tBACK;
 struct cBACK {
-   char        key;
-   char        abbr        [LEN_TERSE];
-   char        color       [LEN_LABEL];
-   char        name        [50];
-   char        rgb         [50];
-   int         hex;
+   char        abbr;
+   char        terse       [LEN_TERSE];
+   char        name        [LEN_LABEL];
+   char        hex         [LEN_TERSE];
+   int         value;
 };
-tBACK       backs       [MAX_BACK];
-int         nback;
+extern tBACK  g_backs     [MAX_BACK];
+extern int    g_nback;
+extern int    g_cback;
+/*> char        g_backs   [52];                                                       <*/
 
 
 
-typedef     struct cRUNTIME  tRUNTIME;
-#define     MAX_RUNTIME     400
+typedef     struct cRUN  tRUN;
+#define     MAX_RUN     400
 #define     FILE_RUNTIME   "/var/run/theia.ttys"
 
-struct cRUNTIME {
-   int         ppid;
-   long        when;
-   char        back_key;
-   char        back_name  [50];
-   int         back_hex;
-   char        theme_ref  [ 5];
-   char        theme_name [50];
+struct cRUN {
+   /*---(eterm specific)----*/
+   short       eterm;                       /* owning eterm                   */
+   char        back        [LEN_TERSE];     /* background terse name          */
+   char        fore        [LEN_TERSE];     /* foreground refno               */
+   /*---(window)------------*/
+   long        ref;                         /* window reference number        */
+   char        desk;                        /* which desktop                  */
+   char        title       [LEN_HUND];      /* current window title           */
+   char        type;                        /* window use based on title      */
+   char        shortcut    [LEN_LABEL];
+   /*---(position)----------*/
+   short       left;
+   short       topp;
+   short       wide;
+   short       tall;
+   char        size;
+   char        scrn;
+   char        locn;
+   /*---(running)-----------*/
+   short       use;
+   char        pubname     [LEN_LABEL];
+   char        cmdline     [LEN_RECD];
+   /*---(done)--------------*/
 };
-tRUNTIME    runtimes    [MAX_RUNTIME];
-int         nruntime;
-
-
-
-/*> #define     MAX_TERM         10000                                                <* 
- *> typedef     struct cTERM     tTERM;                                               <* 
- *> struct cTERM {                                                                    <* 
- *>    int         pid;                                                               <* 
- *>    int         term;                                                              <* 
- *> };                                                                                <* 
- *> tTERM       terms       [MAX_TERM];                                               <* 
- *> int         nterm;                                                                <*/
-
-
-
-
-
-
-
-/*>                                                                                    <* 
- *> /+===[[ DEBUGGING ]]==========================================================+/   <* 
- *> typedef  struct cDEBUG  tDEBUG;                                                    <* 
- *> struct cDEBUG {   /+ abcdefgiopstx +/                                              <* 
- *>    /+---(standards)----------------------+/                                        <* 
- *>    char        tops;                   /+ t) broad structure and context      +/   <* 
- *>    char        args;                   /+ c) command line args and config     +/   <* 
- *>    char        prep;                   /+ x) program setup and teardown       +/   <* 
- *>    char        evnt;                   /+ e) event loop processing            +/   <* 
- *>    char        file;                   /+ f) text and data file input         +/   <* 
- *>    char        inpt;                   /+ i) interactive and keyboard input   +/   <* 
- *>    char        data;                   /+ d) data storage and stuctures       +/   <* 
- *>    char        proc;                   /+ p) data processing/manipulation     +/   <* 
- *>    char        graf;                   /+ g) grahpics, drawing, and display   +/   <* 
- *>    char        outp;                   /+ o) text and data file output        +/   <* 
- *>    char        apis;                   /+ a) interprocess communication       +/   <* 
- *>    char        scrp;                   /+ b) scripts and batch operations     +/   <* 
- *>    char        summ;                   /+ s) statistics and analytical output +/   <* 
- *>    /+---(special)------------------------+/                                        <* 
- *> };                                                                                 <* 
- *> tDEBUG      debug;         /+ primary debugging structure         +/               <*/
-
-/*> #define     DEBUG_TOPS          if (debug.tops      == 'y')                       <* 
- *> #define     DEBUG_ARGS          if (debug.args      == 'y')                       <* 
- *> #define     DEBUG_PREP          if (debug.prep      == 'y')                       <* 
- *> #define     DEBUG_EVENT         if (debug.evnt      == 'y')                       <* 
- *> #define     DEBUG_FILE          if (debug.file      == 'y')                       <* 
- *> #define     DEBUG_INPUT         if (debug.inpt      == 'y')                       <* 
- *> #define     DEBUG_DATA          if (debug.data      == 'y')                       <* 
- *> #define     DEBUG_PROC          if (debug.proc      == 'y')                       <* 
- *> #define     DEBUG_GRAPH         if (debug.graf      == 'y')                       <* 
- *> #define     DEBUG_OUTPUT        if (debug.outp      == 'y')                       <* 
- *> #define     DEBUG_APIS          if (debug.apis      == 'y')                       <* 
- *> #define     DEBUG_SCRIPT        if (debug.scrp      == 'y')                       <* 
- *> #define     DEBUG_SUMM          if (debug.summ      == 'y')                       <*/
-
-
-
-
+extern tRUN   g_runs    [MAX_RUN];
+extern int    g_nrun;
+extern int    g_crun;
 
 
 typedef    struct cACCESSOR  tACCESSOR;
 struct cACCESSOR {
+   /*---(arguments)------------*/
+   char      back_act;
+   char      back_req;
+   char      fore_act   [LEN_TERSE];
+   char      fore_req   [LEN_TERSE];
+   char      report;
+   char      here;
+   char      shortcut      [LEN_LABEL];
    /*---(files)----------------*/
-   char      quiet;          /* bool : 0=normal, 1=quiet                      */
-   int       logger;         /* log file so that we don't close it            */
+   int       custom;
+   int       theme;
+   int       eterm;
+   char      desk;
+   long      win;
+   /*---(files)----------------*/
 };
 tACCESSOR my;
 
+extern      char        unit_answer [LEN_RECD];
 
 char       *ySTR_trim          (char *a_source, char a_mode);
 #define     ySTR_HEAD      'h'
@@ -257,7 +242,68 @@ char       *ySTR_trim          (char *a_source, char a_mode);
 #define     ySTR_COMPRESS  'c'
 
 
+/*---(support)--------------*/
+char*       PROG_version            (void);
+/*---(preinit)--------------*/
+char        PROG__header            (void);
+char        PROG_urgents            (int a_argc, char *a_argv []);
+/*---(startup)--------------*/
+char        PROG__init              (int a_argc, char *a_argv []);
+char        PROG__args              (int a_argc, char *a_argv []);
+char        PROG__begin             (void);
+char        PROG_startup            (int a_argc, char *a_argv []);
+/*---(execution)------------*/
+char        PROG_dawn               (void);
+char        PROG_dusk               (void);
+/*---(shutdown)-------------*/
+char        PROG__end               (void);
+char        PROG_shutdown           (void);
+/*---(testing)--------------*/
+char        PROG__unit_quiet        (void);
+char        PROG__unit_loud         (void);
+char        PROG__unit_end          (void);
+/*---(done)-----------------*/
+
+
+char        CONF_read               (void);
+
+/*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
+char        BACK_purge              (void);
+char        BACK_by_abbr            (cchar a_abbr);
+char        BACK_create             (cchar a_recd [LEN_RECD]);
+char        BACK_set                (cchar a_abbr);
+char*       BACK__unit              (char *a_question, int n);
+
+
+char        FORE_purge              (void);
+char        FORE_by_ref             (cchar a_ref  [LEN_TERSE]);
+char        FORE_create             (cchar a_recd [LEN_RECD]);
+char        FORE_set                (cchar a_ref  [LEN_TERSE]);
+char*       FORE__unit              (char *a_question, int n);
+
+
+/*===[[ theia_run.c ]]========================================================*/
+/*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
+/*---(program)--------------*/
+char        RUN_purge               (void);
+/*---(search)---------------*/
+char        RUN_by_eterm            (short a_eterm);
+char        RUN_by_ref              (long a_ref);
+char        RUN_by_shortcut         (cchar a_shortcut [LEN_LABEL]);
+/*---(create)---------------*/
+char        RUN__create             (cchar a_match, cchar a_recd [LEN_RECD]);
+/*---(exim)-----------------*/
+char        RUN__add_eterm          (short a_rpid, cchar a_pubname [LEN_LABEL], cchar a_cmdline [LEN_RECD], cchar a_state, short a_ppid);
+char        RUN__read               (char a_unit, cchar a_name [LEN_PATH]);
+char        RUN_read                (cchar a_name [LEN_PATH]);
+char        RUN__classify           (cchar a_title [LEN_HUND], cchar a_pubname [LEN_LABEL], cchar a_cmdline [LEN_RECD], cchar a_note [LEN_LABEL]);
+char        RUN_gather              (void);
+char        RUN_write               (cchar a_name [LEN_PATH]);
+/*---(unittest)-------------*/
+char*       RUN__unit               (char *a_question, int n);
+/*---(done)-----------------*/
+
+
 
 #endif
-
 /*===============================[[ end code ]]===============================*/

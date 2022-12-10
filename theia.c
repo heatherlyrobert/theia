@@ -21,47 +21,38 @@ char        corder [MAX_COLOR]     = { 9, 0, 1, 2, 3, 4, 5, 6, 7, -1 };
 
 char        abbr   [MAX_COLOR] = { 'k', 'r', 'g', 'y', 'b', 'm', 'c', 'w' };
 
-char        comp_ord [20] = {  0,  1,  3,  2,  4,  6,  5,  7 };
-char        comp_txt [20] [20] = {
+static char        comp_ord [20] = {  0,  1,  3,  2,  4,  6,  5,  7 };
+static char        comp_txt [20] [20] = {
    "black", "d.red", "d.grn", "d.yel", "d.blu", "d.mag", "d.cyn", "d.brn",
    "white", "l.red", "l.grn", "l.yel", "l.blu", "l.mag", "l.cyn", "l.brn",
 };
 
-char        arti_ord [20] = {  0,  7,  1,  6,  3,  2,  4,  5 };
-char        artistic [20] [20] = {
+static char        arti_ord [20] = {  0,  7,  1,  6,  3,  2,  4,  5 };
+static char        artistic [20] [20] = {
    "black", "d.red", "d.grn", "d.yel", "d.blu", "d.pur", "d.gld", "d.brn",
    "white", "l.red", "l.grn", "l.yel", "l.blu", "l.pur", "l.gld", "l.brn",
 };
 
-char        mega_ord [20] = {  0, 1,  6,  3,  2,  7,  4,  5 };
-char        mega_txt [20] [20] = {
+static char        mega_ord [20] = {  0, 1,  6,  3,  2,  7,  4,  5 };
+static char        mega_txt [20] [20] = {
    "d.brn", "d.red", "d.grn", "d.yel", "d.blu", "d.pur", "d.gld", "d.cyn",
    "l.brn", "l.red", "l.grn", "l.yel", "l.blu", "l.pur", "l.gld", "l.cyn",
 };
 
-char        full_ord [20] = {  1,  6,  3,  2,  7,  4,  5,  0 };
-char        full_txt [20] [20] = {
+static char        full_ord [20] = {  1,  6,  3,  2,  7,  4,  5,  0 };
+static char        full_txt [20] [20] = {
    "d.cri", "d.red", "d.grn", "d.yel", "d.blu", "d.pur", "d.gld", "d.cyn",
    "l.cri", "l.red", "l.grn", "l.yel", "l.blu", "l.pur", "l.gld", "l.cyn",
 };
 
-char        colo_ord [20] = {  0,  1,  6,  3,  2,  4,  5,  7 };
-char        colo_txt [20] [20] = {
+static char        colo_ord [20] = {  0,  1,  6,  3,  2,  4,  5,  7 };
+static char        colo_txt [20] [20] = {
    "d.brn", "d.red", "d.grn", "d.yel", "d.blu", "d.pur", "d.ora", "d.cri",
    "l.brn", "l.red", "l.grn", "l.yel", "l.blu", "l.pur", "l.ora", "l.cri",
 };
 
-char        s_report;
 
-char        s_backno  = '-';
-int         s_back    = -1;
-int         s_custom  = -1;
-char        s_backs   [52] = "";
 
-char        s_refnum     [  5];;
-int         s_theme   = -1;
-
-char        verstring    [500];
 
 
 
@@ -129,200 +120,6 @@ ySTR_trim          (char *a_source, char a_mode)
 /*===----                           schemes                            ----===*/
 /*====================------------------------------------====================*/
 void  o___SCHEMES_________o () { return; }
-
-char         /*--> read all schemes from source file -----[ ------ [ ------ ]-*/
-SCHEMES_read       (void)
-{
-   /*---(locals)-----------+-----------+-*/
-   FILE       *f           = NULL;          /* file handle for source file    */
-   char        rce         = -10;           /* return code for errors         */
-   char        rc          =   0;           /* generic return code            */
-   char        recd        [LEN_RECD];
-   int         x_len;
-   char       *p;
-   char       *q           = "\x1F";
-   int         x_num       = 0;
-   int         i           = 0;
-   int         j           = 0;
-   int         x_place     = 0;
-   int         x_mult      = 0;
-   int         x_lines     = 0;
-   char        x_result    [20];
-   /*---(header)-------------------------*/
-   DEBUG_FILE   yLOG_enter   (__FUNCTION__);
-   /*---(open file)----------------------*/
-   f = fopen(FILE_SCHEMES, "r");
-   --rce;  if (rc != 0) {
-      DEBUG_FILE   yLOG_exit    (__FUNCTION__);
-      return rce;
-   }
-   /*---(read schemes)-------------------*/
-   while (1) {
-      /*---(get record)------------------*/
-      fgets (recd, LEN_RECD, f);
-      if (feof(f))                     break;
-      ++x_lines;
-      DEBUG_FILE   yLOG_value   ("LINE"      , x_lines);
-      x_len = strlen (recd);
-      if (x_len <= 0)                  continue;
-      recd [--x_len] = '\0';
-      /*---(get record type)-------------*/
-      p = strtok (recd, "\x1F");
-      if (p == NULL)                   continue;
-      ySTR_trim (p, ySTR_BOTH);
-      x_len = strlen (p);
-      DEBUG_FILE   yLOG_value   ("length"    , x_len);
-      if (x_len > 10)                  continue;
-      DEBUG_FILE   yLOG_info    ("rectype"   , p);
-      /*---(filter non-scheme lines)-----*/
-      if (x_len <= 0)                  continue;
-      if (p[0] == '#')                 continue;
-      if (p[0] == ' ')                 continue;
-      if (p[0] == '\0')                continue;
-      /*---(address themes)--------------*/
-      if (strcmp (p, "theme") == 0) {
-         /*---(read ref number)-------------*/
-         p = strtok (NULL, q);
-         if (p == NULL)                   continue;
-         ySTR_trim (p, ySTR_BOTH);
-         x_len = strlen (p);
-         DEBUG_FILE   yLOG_value   ("len"       , x_len);
-         if (x_len != 2)                  break;
-         DEBUG_FILE   yLOG_info    ("refnum"    , p);
-         strcpy (themes  [ntheme].refno, p);
-         /*---(read name)-------------------*/
-         p = strtok (NULL, q);
-         if (p == NULL)                   continue;
-         ySTR_trim (p, ySTR_BOTH);
-         x_len = strlen (p);
-         if (x_len <= 0)                  continue;
-         DEBUG_FILE   yLOG_info    ("name"      , p);
-         strcpy (themes  [ntheme].name, p);
-         /*---(read style)------------------*/
-         p = strtok (NULL, q);
-         if (p == NULL)                   continue;
-         ySTR_trim (p, ySTR_BOTH);
-         x_len = strlen (p);
-         if (x_len <= 0)                  continue;
-         DEBUG_FILE   yLOG_info    ("style"     , p);
-         themes  [ntheme].style = p [0];
-         /*---(read colors)-----------------*/
-         for (i = 0; i < 16; ++i) {
-            DEBUG_FILE   yLOG_value   ("color"     , i);
-            p = strtok (NULL, q);
-            if (p == NULL)                break;
-            ySTR_trim (p, ySTR_BOTH);
-            DEBUG_FILE   yLOG_info    ("hex"       , p);
-            x_len = strlen (p);
-            DEBUG_FILE   yLOG_value   ("len"       , x_len);
-            if (x_len != 6)               break;
-            x_num  = 0;
-            x_mult = 1;
-            for (j = 5; j >= 0; --j) {
-               if (p[j] >= '0' && p[j] <= '9')  x_place = p[j] - '0';
-               if (p[j] >= 'a' && p[j] <= 'f')  x_place = p[j] - 'a' + 10;
-               if (p[j] >= 'A' && p[j] <= 'F')  x_place = p[j] - 'A' + 10;
-               x_num  += x_place * x_mult;
-               DEBUG_FILE   yLOG_complex ("place"     , "%1d, %c, %2d, %8d, %8d", j, p[j], x_place, x_mult, x_num);
-               x_mult *= 16;
-            }
-            DEBUG_FILE   yLOG_complex ("color"     , "%2d, %1d, %6s, %6d", i, x_len, p, x_num);
-            if (x_num <  0       )        break;
-            if (x_num >  16777215)        break;
-            themes  [ntheme].hex [i + 2] = x_num;
-            sprintf (x_result, "%06x", themes  [ntheme].hex [i + 2]);
-            DEBUG_FILE   yLOG_info    ("result"    , x_result);
-            /*---(fill in defaults)---------*/
-            if (i ==  0)  themes  [ntheme].hex [0] = x_num;
-            if (i == 15)  themes  [ntheme].hex [1] = x_num;
-         }
-         if (i != 16)                     continue;
-         /*---(ready for next)--------------*/
-         ++ntheme;
-         /*---(done)------------------------*/
-      }
-      /*---(address backgrounds)---------*/
-      else if (strcmp (p, "background") == 0) {
-         /*---(read key)--------------------*/
-         p = strtok (NULL, q);
-         if (p == NULL)                break;
-         ySTR_trim (p, ySTR_BOTH);
-         DEBUG_FILE   yLOG_info    ("key"       , p);
-         x_len = strlen (p);
-         if (x_len != 1)                  continue;
-         backs [nback].key   = p[0];
-         /*---(read abbreviation)-----------*/
-         p = strtok (NULL, q);
-         if (p == NULL)                break;
-         ySTR_trim (p, ySTR_BOTH);
-         DEBUG_FILE   yLOG_info    ("abbrev"    , p);
-         x_len = strlen (p);
-         if (x_len != 6)                  continue;
-         strcpy (backs [nback].abbr  , p);
-         /*---(read color)------------------*/
-         p = strtok (NULL, q);
-         if (p == NULL)                break;
-         ySTR_trim (p, ySTR_BOTH);
-         DEBUG_FILE   yLOG_info    ("color"     , p);
-         x_len = strlen (p);
-         if (x_len <= 0)                  continue;
-         strcpy (backs [nback].color, p);
-         /*---(read name)-------------------*/
-         p = strtok (NULL, q);
-         if (p == NULL)                break;
-         ySTR_trim (p, ySTR_BOTH);
-         DEBUG_FILE   yLOG_info    ("name"      , p);
-         x_len = strlen (p);
-         if (x_len <= 0)                  continue;
-         strcpy (backs [nback].name  , p);
-         /*---(read rgb name)---------------*/
-         p = strtok (NULL, q);
-         if (p == NULL)                break;
-         ySTR_trim (p, ySTR_BOTH);
-         DEBUG_FILE   yLOG_info    ("rgb"       , p);
-         x_len = strlen (p);
-         if (x_len <= 0)                  continue;
-         strcpy (backs [nback].rgb   , p);
-         /*---(read color)------------------*/
-         p = strtok (NULL, q);
-         if (p == NULL)                break;
-         ySTR_trim (p, ySTR_BOTH);
-         DEBUG_FILE   yLOG_info    ("hex"       , p);
-         x_len = strlen (p);
-         DEBUG_FILE   yLOG_value   ("len"       , x_len);
-         if (x_len != 6)               break;
-         x_num  = 0;
-         x_mult = 1;
-         for (j = 5; j >= 0; --j) {
-            if (p[j] >= '0' && p[j] <= '9')  x_place = p[j] - '0';
-            if (p[j] >= 'a' && p[j] <= 'f')  x_place = p[j] - 'a' + 10;
-            if (p[j] >= 'A' && p[j] <= 'F')  x_place = p[j] - 'A' + 10;
-            x_num  += x_place * x_mult;
-            DEBUG_FILE   yLOG_complex ("place"     , "%1d, %c, %2d, %8d, %8d", j, p[j], x_place, x_mult, x_num);
-            x_mult *= 16;
-         }
-         DEBUG_FILE   yLOG_complex ("color"     , "%2d, %1d, %6s, %6d", i, x_len, p, x_num);
-         if (x_num <  0       )        break;
-         if (x_num >  16777215)        break;
-         backs   [nback].hex       = x_num;
-         sprintf (x_result, "%06x", backs [nback].hex);
-         DEBUG_FILE   yLOG_info    ("result"    , x_result);
-         /*---(add to list)-----------------*/
-         s_backs [nback]   = backs [nback].key;
-         s_backs [++nback] = '\0';
-         /*---(ready for next)--------------*/
-      }
-   }
-   /*---(close file)---------------------*/
-   rc = fclose (f);
-   --rce;  if (rc != 0) {
-      DEBUG_FILE   yLOG_exit    (__FUNCTION__);
-      return rce;
-   }
-   /*---(complete)-----------------------*/
-   DEBUG_FILE   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
 
 
 
@@ -430,74 +227,6 @@ TERM_find          (int a_pid, int *a_term)
 void  o___BACKS___________o () { return; }
 
 char         /*--> set a back by key ---------------------[ ------ [ ------ ]-*/
-BACK_find          (char a_key)
-{
-   /*---(locals)-----------+-----------+-*/
-   int         i           = 0;
-   /*---(find back)----------------------*/
-   s_back   = 0;
-   for (i = 1; i < nback; ++i) {
-      if (backs  [i].key != a_key)  continue;
-      s_back   = i;
-      break;
-   }
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
-char         /*--> set a back by key ---------------------[ ------ [ ------ ]-*/
-BACK_set           (void)
-{
-   /*---(locals)-----------+-----------+-*/
-   int         i           = 0;
-   int         j           = 0;
-   int         x           = 0;
-   int         y           = 0;
-   char        x_str       [20];
-   int         x_ppid      = 0;
-   long        x_now       = 0;
-   char        rce         = -10;
-   char        rc          = 0;
-   /*---(header)-------------------------*/
-   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
-   /*---(defense: index)-----------------*/
-   --rce;  if (s_back < 0)             return rce;
-   --rce;  if (s_back >= nback)        return rce;
-   /*---(set background)-----------------*/
-   sprintf (x_str, "\e]6;2;tint;bg;0x%06x", backs [s_back].hex);
-   DEBUG_GRAF  yLOG_complex ("back"      , "%2d, %c, %s, %s, %s", s_back, backs [s_back].key, backs [s_back].abbr, backs [s_back].color, backs [s_back].name);
-   DEBUG_GRAF  yLOG_complex ("color"     , "%10d, %s", backs [s_back].hex, x_str);
-   printf ("\e]6;0;true");
-   printf ("\e]6;2;tint;bg;0x%06x", backs [s_back].hex);
-   /*---(find eterm or hestia)-----------*/
-   rc = TERM_find (getppid(), &x_ppid);
-   --rce;  if (rc < 0)                 return rce;
-   /*---(update in runtime list)---------*/
-   x_now  = time(NULL);
-   for (j = 0; j < nruntime; ++j) {
-      if (x_ppid != runtimes [j].ppid)  continue;
-      runtimes [j].when       = x_now;
-      runtimes [j].back_key   = backs [s_back].key;
-      strcpy (runtimes [j].back_name, backs [s_back].name);
-      runtimes [j].back_hex   = backs [s_back].hex;
-      break;
-   }
-   if (j == nruntime) {
-      runtimes [j].ppid       = x_ppid;
-      runtimes [j].when       = x_now;
-      runtimes [j].back_key   = backs [s_back].key;
-      strcpy (runtimes [j].back_name, backs [s_back].name);
-      runtimes [j].back_hex   = backs [s_back].hex;
-      strcpy (runtimes [j].theme_ref, s_refnum);
-      strcpy (runtimes [j].theme_name, "unknown");
-      ++nruntime;
-   }
-   /*---(complete)-----------------------*/
-   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-char         /*--> set a back by key ---------------------[ ------ [ ------ ]-*/
 BACK_custom        (void)
 {
    /*---(locals)-----------+-----------+-*/
@@ -513,64 +242,37 @@ BACK_custom        (void)
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(defense: index)-----------------*/
-   --rce;  if (s_custom < 0)           return rce;
+   --rce;  if (my.custom < 0)           return rce;
    /*---(set background)-----------------*/
-   sprintf (x_str, "\e]6;2;tint;bg;0x%06x", s_custom);
-   DEBUG_GRAF  yLOG_complex ("color"     , "%10d, %s", s_custom, x_str);
+   sprintf (x_str, "¥]6;2;tint;bg;0x%06x", my.custom);
+   DEBUG_GRAF  yLOG_complex ("color"     , "%10d, %s", my.custom, x_str);
    printf ("\e]6;0;true");
-   printf ("\e]6;2;tint;bg;0x%06x", s_custom);
+   printf ("¥]6;2;tint;bg;0x%06x", my.custom);
    /*---(find eterm or hestia)-----------*/
    rc = TERM_find (getppid(), &x_ppid);
    --rce;  if (rc < 0)                 return rce;
    /*---(update in runtime list)---------*/
    x_now  = time(NULL);
-   for (j = 0; j < nruntime; ++j) {
-      if (x_ppid != runtimes [j].ppid)  continue;
-      runtimes [j].when       = x_now;
-      runtimes [j].back_key   = '>';
-      strcpy (runtimes [j].back_name, "custom");
-      runtimes [j].back_hex   = s_custom;
+   for (j = 0; j < g_nrun; ++j) {
+      /*> if (x_ppid != g_runs [j].ppid)  continue;                                   <* 
+       *> g_runs [j].when       = x_now;                                              <* 
+       *> g_runs [j].back_key   = '>';                                                <* 
+       *> strcpy (g_runs [j].back_name, "custom");                                    <* 
+       *> g_runs [j].back_hex   = my.custom;                                          <*/
       break;
    }
-   if (j == nruntime) {
-      runtimes [j].ppid       = x_ppid;
-      runtimes [j].when       = x_now;
-      runtimes [j].back_key   = '>';
-      strcpy (runtimes [j].back_name, "custom");
-      runtimes [j].back_hex   = s_custom;
-      strcpy (runtimes [j].theme_ref, s_refnum);
-      strcpy (runtimes [j].theme_name, "unknown");
-      ++nruntime;
+   if (j == g_nrun) {
+      /*> g_runs [j].ppid       = x_ppid;                                             <* 
+       *> g_runs [j].when       = x_now;                                              <* 
+       *> g_runs [j].back_key   = '>';                                                <* 
+       *> strcpy (g_runs [j].back_name, "custom");                                    <* 
+       *> g_runs [j].back_hex   = my.custom;                                          <* 
+       *> strcpy (g_runs [j].theme_ref, my.fore);                                   <* 
+       *> strcpy (g_runs [j].theme_name, "unknown");                                  <* 
+       *> ++g_nrun;                                                                   <*/
    }
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-char         /*--> list the background color options -----[ ------ [ ------ ]-*/
-BACK_report        (void)
-{
-   /*---(locals)-----------+-----------+-*/
-   int         i           = 0;
-   char        x_save      [50];
-   char        x_group     [50];
-   /*---(header)-------------------------*/
-   printf ("\ntheia euryphaessa (wide-shinning) transparent background tint inventory\n");
-   printf ("\nusage : theia <c>\n");
-   printf ("   where <c> is the single letter listed in the 'k' column\n");
-   printf ("\n--k  -abbr-   ---name-------------  -hex--\n");
-   /*---(inventory)----------------------*/
-   for (i = 0; i < nback; ++i) {
-      if (i == 0 || (i > 0 && strcmp (backs[i-1].color, backs[i].color) != 0)) {
-         printf ("\n%s\n", backs[i].color);
-      }
-      printf ("  %c  %-6.6s   %-20.20s  %06x\n",
-            backs [i].key   , backs [i].abbr,
-            backs [i].name  , backs [i].hex);
-   }
-   /*---(footer)-------------------------*/
-   printf ("\n");
-   /*---(complete)-----------------------*/
    return 0;
 }
 
@@ -587,10 +289,10 @@ THEME_find         (char *a_ref)
    /*---(locals)-----------+-----------+-*/
    int         i           = 0;
    /*---(find scheme)--------------------*/
-   s_theme  = 0;
-   for (i = 0; i < ntheme; ++i) {
-      if (strcmp (themes [i].refno, a_ref) != 0)  continue;
-      s_theme  = i;
+   my.theme  = 0;
+   for (i = 0; i < g_nfore; ++i) {
+      if (strcmp (g_fores [i].refno, a_ref) != 0)  continue;
+      my.theme  = i;
       break;
    }
    /*---(complete)-----------------------*/
@@ -625,19 +327,19 @@ THEME_set          (void)
    /*---(find reference)-----------------*/
    for (j = 0; j < 18; ++j) {
       /*> if (j ==  0) {                                                                              <* 
-       *>    yLOG_complex ("back"      , "%2d, 49, %8d, %6x", j, themes [s_theme].color [j], themes [s_theme].color [j]);   <* 
-       *>    printf ("\e]49;%06x", themes [s_theme].color [j]);                                                 <* 
+       *>    yLOG_complex ("back"      , "%2d, 49, %8d, %6x", j, g_fores [my.theme].color [j], g_fores [my.theme].color [j]);   <* 
+       *>    printf ("¥]49;%06x, g_fores [my.theme].color [j]);                                                 <* 
        *> }                                                                                           <* 
        *> if (j ==  1) {                                                                              <* 
-       *>    yLOG_complex ("fore"      , "%2d, 39, %8d, %6x", j, themes [s_theme].color [j], themes [s_theme].color [j]);   <* 
-       *>    printf ("\e]39;%06x", themes [s_theme].color [j]);                                                 <* 
+       *>    yLOG_complex ("fore"      , "%2d, 39, %8d, %6x", j, g_fores [my.theme].color [j], g_fores [my.theme].color [j]);   <* 
+       *>    printf ("¥]39;%06x, g_fores [my.theme].color [j]);                                                 <* 
        *> }                                                                                           <*/
       if (j >=  2) {
          x = ((int) j / 2) - 1 + ((j % 2) *  8);
          y = ((int) j / 2) - 1 + ((j % 2) * 10) + 30;
-         sprintf (x_str, "\e]P%1x%06x", x, themes [s_theme].hex [j]);
-         DEBUG_GRAF  yLOG_complex ("color"     , "%2d, %2d, %8d, %6x, %s", j, y, themes [s_theme].hex [j], themes [s_theme].hex [j], x_str);
-         printf ("\e]P%1x%06x", x, themes [s_theme].hex [j]);
+         sprintf (x_str, "¥]P%1x%06x", x, g_fores [my.theme].hex [j]);
+         DEBUG_GRAF  yLOG_complex ("color"     , "%2d, %2d, %8d, %6x, %s", j, y, g_fores [my.theme].hex [j], g_fores [my.theme].hex [j], x_str);
+         printf ("¥]P%1x%06x", x, g_fores [my.theme].hex [j]);
       }
    }
    /*---(find eterm or hestia)-----------*/
@@ -645,22 +347,22 @@ THEME_set          (void)
    --rce;  if (rc < 0)                 return rce;
    /*---(update in runtime list)---------*/
    x_now  = time(NULL);
-   for (j = 0; j < nruntime; ++j) {
-      if (x_ppid != runtimes [j].ppid)  continue;
-      runtimes [j].when      = x_now;
-      strcpy (runtimes [j].theme_ref, s_refnum);
-      strcpy (runtimes [j].theme_name, themes [s_theme].name);
+   for (j = 0; j < g_nrun; ++j) {
+      /*> if (x_ppid != g_runs [j].ppid)  continue;                                   <* 
+       *> g_runs [j].when      = x_now;                                               <* 
+       *> strcpy (g_runs [j].theme_ref, my.fore);                                   <* 
+       *> strcpy (g_runs [j].theme_name, g_fores [my.theme].name);                    <*/
       break;
    }
-   if (j == nruntime) {
-      runtimes [j].ppid      = x_ppid;
-      runtimes [j].when      = x_now;
-      runtimes [j].back_key  = '-';
-      strcpy (runtimes [j].back_name , "------");
-      runtimes [j].back_hex  = 0;
-      strcpy (runtimes [j].theme_ref, s_refnum);
-      strcpy (runtimes [j].theme_name, themes [s_theme].name);
-      ++nruntime;
+   if (j == g_nrun) {
+      /*> g_runs [j].ppid      = x_ppid;                                              <* 
+       *> g_runs [j].when      = x_now;                                               <* 
+       *> g_runs [j].back_key  = '-';                                                 <* 
+       *> strcpy (g_runs [j].back_name , "------");                                   <* 
+       *> g_runs [j].back_hex  = 0;                                                   <* 
+       *> strcpy (g_runs [j].theme_ref, my.fore);                                   <* 
+       *> strcpy (g_runs [j].theme_name, g_fores [my.theme].name);                    <* 
+       *> ++g_nrun;                                                                   <*/
    }
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
@@ -707,12 +409,12 @@ RUNTIME_write      (void)
    fprintf (f, "\n\n");
    fprintf (f, "#===[[ TERMINALS ]]==================================================================================================================\n");
    fprintf (f, "#-pid------- %c --time------ %c -background------------------- %c -font-theme------------------- %c -geometry--------------------- %c\n", 31, 31, 31, 31, 31);
-   /*---(write runtimes)-----------------*/
-   for (i = 0; i < nruntime; ++i) {
-      if (runtimes [i].back_key == '-')  sprintf (x_back, "-  ------  ------");
-      else                               sprintf (x_back, "%c  %06x  %s", runtimes[i].back_key, runtimes[i].back_hex, runtimes[i].back_name);
-      sprintf (x_theme, "%2s  %-25.25s", runtimes[i].theme_ref, runtimes[i].theme_name);
-      fprintf (f, "%-12d %c %-12d %c %-30.30s %c %-30.30s %c %2d   %c %4d %4d   %c %4d %4d %c\n", runtimes[i].ppid, 31, runtimes[i].when, 31, x_back, 31, x_theme, 31, 1, 'c', 50, 10, 'q', 400, 800, 31);
+   /*---(write g_runs)-----------------*/
+   for (i = 0; i < g_nrun; ++i) {
+      /*> if (g_runs [i].back_key == '-')  sprintf (x_back, "-  ------  ------");                                                                                                                           <* 
+       *> else                               sprintf (x_back, "%c  %06x  %s", g_runs[i].back_key, g_runs[i].back_hex, g_runs[i].back_name);                                                                 <* 
+       *> sprintf (x_theme, "%2s  %-25.25s", g_runs[i].theme_ref, g_runs[i].theme_name);                                                                                                                    <* 
+       *> fprintf (f, "%-12d %c %-12d %c %-30.30s %c %-30.30s %c %2d   %c %4d %4d   %c %4d %4d %c¦", g_runs[i].ppid, 31, g_runs[i].when, 31, x_back, 31, x_theme, 31, 1, 'c', 50, 10, 'q', 400, 800, 31);   <*/
    }
    fprintf (f, "\n# end of file\n");
    /*---(close file)---------------------*/
@@ -730,149 +432,149 @@ char         /*--> save current theme to runtime ---------[ ------ [ ------ ]-*/
 RUNTIME_read       (void)
 {
    /*---(locals)-----------+-----------+-*/
-   FILE       *f           = NULL;          /* file handle for source file    */
-   char        rce         = -10;           /* return code for errors         */
-   char        rc          =   0;           /* generic return code            */
-   char        recd        [LEN_RECD];
-   int         x_len;
-   char       *p;
-   char       *q           = "\x1F";
-   long        x_num       = 0;
-   int         x_lines     = 0;
-   int         j           = 0;
-   int         x_place     = 0;
-   int         x_mult      = 0;
-   char        x_result    [20];
-   /*---(header)-------------------------*/
-   DEBUG_FILE   yLOG_enter   (__FUNCTION__);
-   nruntime = 0;
-   /*---(open file)----------------------*/
-   f = fopen (FILE_RUNTIME, "r");
-   DEBUG_FILE   yLOG_info    ("filename"  , FILE_RUNTIME);
-   DEBUG_FILE   yLOG_point   ("file"      , f);
-   --rce;  if (f == NULL) {
-      DEBUG_FILE   yLOG_exit    (__FUNCTION__);
-      return rce;
-   }
-   /*---(read terminal)------------------*/
-   while (1) {
-      /*---(get record)------------------*/
-      fgets (recd, LEN_RECD, f);
-      if (feof(f))                     break;
-      ++x_lines;
-      DEBUG_FILE   yLOG_value   ("LINE"      , x_lines);
-      x_len = strlen (recd);
-      if (x_len <= 0)                  continue;
-      recd [--x_len] = '\0';
-      /*---(filter non-scheme lines)-----*/
-      if (x_len <= 0)                  continue;
-      if (recd[0] == '#')              continue;
-      if (recd[0] == ' ')              continue;
-      if (recd[0] == '\0')             continue;
-      /*---(get ppid)--------------------*/
-      p = strtok (recd, "\x1F");
-      if (p == NULL)                   continue;
-      ySTR_trim (p, ySTR_BOTH);
-      x_num = atoi (p);
-      DEBUG_FILE   yLOG_value   ("ppid"      , x_num);
-      if (x_num <= 0)                  continue;
-      runtimes [nruntime].ppid = x_num;
-      /*---(get time)--------------------*/
-      p = strtok (NULL, "\x1F");
-      if (p == NULL)                   continue;
-      ySTR_trim (p, ySTR_BOTH);
-      x_num = atoi (p);
-      DEBUG_FILE   yLOG_value   ("time"      , x_num);
-      if (x_num <= 0)                  continue;
-      runtimes [nruntime].when = x_num;
-      /*---(get background)--------------*/
-      p = strtok (NULL, "\x1F");
-      if (p == NULL)                   continue;
-      ySTR_trim (p, ySTR_BOTH);
-      x_len = strlen (p);
-      if (x_len  <  9)                 continue;
-      DEBUG_FILE   yLOG_value   ("back_key"  , p[0]);
-      runtimes [nruntime].back_key  = p[0];
-      if      (p[0] == '-')  x_num = 0;
-      else {
-         /*---(read color)------------------*/
-         p = p + 3;
-         x_num  = 0;
-         x_mult = 1;
-         for (j = 5; j >= 0; --j) {
-            if (p[j] >= '0' && p[j] <= '9')  x_place = p[j] - '0';
-            if (p[j] >= 'a' && p[j] <= 'f')  x_place = p[j] - 'a' + 10;
-            if (p[j] >= 'A' && p[j] <= 'F')  x_place = p[j] - 'A' + 10;
-            x_num  += x_place * x_mult;
-            x_mult *= 16;
-         }
-         DEBUG_FILE   yLOG_complex ("color"     , "%6s, %6d", p, x_num);
-         if (x_num <  0       )        break;
-         if (x_num >  16777215)        break;
-         runtimes [nruntime].back_hex = x_num;
-         sprintf (x_result, "%06x", runtimes [nruntime].back_hex);
-         DEBUG_FILE   yLOG_info    ("result"    , x_result);
-      }
-      DEBUG_FILE   yLOG_value   ("back_hex"  , x_num);
-      strcpy (runtimes [nruntime].back_name, p + 8);
-      if (x_num < -1)                  continue;
-      runtimes [nruntime].back_hex  = x_num;
-      /*---(get ref for scheme)----------*/
-      p = strtok (NULL, "\x1F");
-      if (p == NULL)                   continue;
-      ySTR_trim (p, ySTR_BOTH);
-      x_len = strlen (p);
-      if (x_len  < 2)                  continue;
-      if (strchr ("0123456789abcdef", p[0]) != 0 && strchr ("0123456789abcdef", p[1]) != 0) {
-         runtimes [nruntime].theme_ref[0] = p[0];
-         runtimes [nruntime].theme_ref[1] = p[1];
-         runtimes [nruntime].theme_ref[2] = '\0';
-      }
-      DEBUG_FILE   yLOG_info    ("theme_ref" , runtimes [nruntime].theme_ref);
-      if (p[4] != '-')  strcpy (runtimes [nruntime].theme_name, p + 4);
-      else              strcpy (runtimes [nruntime].theme_name, "----------");
-      /*---(prepare for next)------------*/
-      ++nruntime;
-   }
-   /*---(close file)---------------------*/
-   rc = fclose (f);
-   --rce;  if (rc != 0) {
-      DEBUG_FILE   yLOG_exit    (__FUNCTION__);
-      return rce;
-   }
-   /*---(complete)-----------------------*/
-   DEBUG_FILE   yLOG_exit    (__FUNCTION__);
-   /*---(complete)-----------------------*/
-   return 0;
+   /*> FILE       *f           = NULL;          /+ file handle for source file    +/                <* 
+    *> char        rce         = -10;           /+ return code for errors         +/                <* 
+    *> char        rc          =   0;           /+ generic return code            +/                <* 
+    *> char        recd        [LEN_RECD];                                                          <* 
+    *> int         x_len;                                                                           <* 
+    *> char       *p;                                                                               <* 
+    *> char       *q           = "\x1F";                                                            <* 
+    *> long        x_num       = 0;                                                                 <* 
+    *> int         x_lines     = 0;                                                                 <* 
+    *> int         j           = 0;                                                                 <* 
+    *> int         x_place     = 0;                                                                 <* 
+    *> int         x_mult      = 0;                                                                 <* 
+    *> char        x_result    [20];                                                                <* 
+    *> /+---(header)-------------------------+/                                                     <* 
+    *> DEBUG_FILE   yLOG_enter   (__FUNCTION__);                                                    <* 
+    *> g_nrun = 0;                                                                                  <* 
+    *> /+---(open file)----------------------+/                                                     <* 
+    *> f = fopen (FILE_RUNTIME, "r");                                                               <* 
+    *> DEBUG_FILE   yLOG_info    ("filename"  , FILE_RUNTIME);                                      <* 
+    *> DEBUG_FILE   yLOG_point   ("file"      , f);                                                 <* 
+    *> --rce;  if (f == NULL) {                                                                     <* 
+    *>    DEBUG_FILE   yLOG_exit    (__FUNCTION__);                                                 <* 
+    *>    return rce;                                                                               <* 
+    *> }                                                                                            <* 
+    *> /+---(read terminal)------------------+/                                                     <* 
+    *> while (1) {                                                                                  <* 
+    *>    /+---(get record)------------------+/                                                     <* 
+    *>    fgets (recd, LEN_RECD, f);                                                                <* 
+    *>    if (feof(f))                     break;                                                   <* 
+    *>    ++x_lines;                                                                                <* 
+    *>    DEBUG_FILE   yLOG_value   ("LINE"      , x_lines);                                        <* 
+    *>    x_len = strlen (recd);                                                                    <* 
+    *>    if (x_len <= 0)                  continue;                                                <* 
+    *>    recd [--x_len] = '\0';                                                                    <* 
+    *>    /+---(filter non-scheme lines)-----+/                                                     <* 
+    *>    if (x_len <= 0)                  continue;                                                <* 
+    *>    if (recd[0] == '#')              continue;                                                <* 
+    *>    if (recd[0] == ' ')              continue;                                                <* 
+    *>    if (recd[0] == '\0')             continue;                                                <* 
+    *>    /+---(get ppid)--------------------+/                                                     <* 
+    *>    p = strtok (recd, "\x1F");                                                                <* 
+    *>    if (p == NULL)                   continue;                                                <* 
+    *>    ySTR_trim (p, ySTR_BOTH);                                                                 <* 
+    *>    x_num = atoi (p);                                                                         <* 
+    *>    DEBUG_FILE   yLOG_value   ("ppid"      , x_num);                                          <* 
+    *>    if (x_num <= 0)                  continue;                                                <* 
+    *>    g_runs [g_nrun].ppid = x_num;                                                             <* 
+    *>    /+---(get time)--------------------+/                                                     <* 
+    *>    p = strtok (NULL, "\x1F");                                                                <* 
+    *>    if (p == NULL)                   continue;                                                <* 
+    *>    ySTR_trim (p, ySTR_BOTH);                                                                 <* 
+    *>    x_num = atoi (p);                                                                         <* 
+    *>    DEBUG_FILE   yLOG_value   ("time"      , x_num);                                          <* 
+    *>    if (x_num <= 0)                  continue;                                                <* 
+    *>    g_runs [g_nrun].when = x_num;                                                             <* 
+    *>    /+---(get background)--------------+/                                                     <* 
+    *>    p = strtok (NULL, "\x1F");                                                                <* 
+    *>    if (p == NULL)                   continue;                                                <* 
+    *>    ySTR_trim (p, ySTR_BOTH);                                                                 <* 
+    *>    x_len = strlen (p);                                                                       <* 
+    *>    if (x_len  <  9)                 continue;                                                <* 
+    *>    DEBUG_FILE   yLOG_value   ("back_key"  , p[0]);                                           <* 
+    *>    g_runs [g_nrun].back_key  = p[0];                                                         <* 
+    *>    if      (p[0] == '-')  x_num = 0;                                                         <* 
+    *>    else {                                                                                    <* 
+    *>       /+---(read color)------------------+/                                                  <* 
+    *>       p = p + 3;                                                                             <* 
+    *>       x_num  = 0;                                                                            <* 
+    *>       x_mult = 1;                                                                            <* 
+    *>       for (j = 5; j >= 0; --j) {                                                             <* 
+    *>          if (p[j] >= '0' && p[j] <= '9')  x_place = p[j] - '0';                              <* 
+    *>          if (p[j] >= 'a' && p[j] <= 'f')  x_place = p[j] - 'a' + 10;                         <* 
+    *>          if (p[j] >= 'A' && p[j] <= 'F')  x_place = p[j] - 'A' + 10;                         <* 
+    *>          x_num  += x_place * x_mult;                                                         <* 
+    *>          x_mult *= 16;                                                                       <* 
+    *>       }                                                                                      <* 
+    *>       DEBUG_FILE   yLOG_complex ("color"     , "%6s, %6d", p, x_num);                        <* 
+    *>       if (x_num <  0       )        break;                                                   <* 
+    *>       if (x_num >  16777215)        break;                                                   <* 
+    *>       g_runs [g_nrun].back_hex = x_num;                                                      <* 
+    *>       sprintf (x_result, "%06x", g_runs [g_nrun].back_hex);                                  <* 
+    *>       DEBUG_FILE   yLOG_info    ("result"    , x_result);                                    <* 
+    *>    }                                                                                         <* 
+    *>    DEBUG_FILE   yLOG_value   ("back_hex"  , x_num);                                          <* 
+    *>    strcpy (g_runs [g_nrun].back_name, p + 8);                                                <* 
+    *>    if (x_num < -1)                  continue;                                                <* 
+    *>    g_runs [g_nrun].back_hex  = x_num;                                                        <* 
+    *>    /+---(get ref for scheme)----------+/                                                     <* 
+    *>    p = strtok (NULL, "\x1F");                                                                <* 
+    *>    if (p == NULL)                   continue;                                                <* 
+    *>    ySTR_trim (p, ySTR_BOTH);                                                                 <* 
+    *>    x_len = strlen (p);                                                                       <* 
+    *>    if (x_len  < 2)                  continue;                                                <* 
+    *>    if (strchr ("0123456789abcdef", p[0]) != 0 && strchr ("0123456789abcdef", p[1]) != 0) {   <* 
+    *>       g_runs [g_nrun].theme_ref[0] = p[0];                                                   <* 
+    *>       g_runs [g_nrun].theme_ref[1] = p[1];                                                   <* 
+    *>       g_runs [g_nrun].theme_ref[2] = '£';                                                    <* 
+    *>    }                                                                                         <* 
+    *>    DEBUG_FILE   yLOG_info    ("theme_ref" , g_runs [g_nrun].theme_ref);                      <* 
+    *>    if (p[4] != '-')  strcpy (g_runs [g_nrun].theme_name, p + 4);                             <* 
+    *>    else              strcpy (g_runs [g_nrun].theme_name, "----------");                      <* 
+    *>    /+---(prepare for next)------------+/                                                     <* 
+    *>    ++g_nrun;                                                                                 <* 
+    *> }                                                                                            <* 
+    *> /+---(close file)---------------------+/                                                     <* 
+    *> rc = fclose (f);                                                                             <* 
+    *> --rce;  if (rc != 0) {                                                                       <* 
+    *>    DEBUG_FILE   yLOG_exit    (__FUNCTION__);                                                 <* 
+    *>    return rce;                                                                               <* 
+    *> }                                                                                            <* 
+    *> /+---(complete)-----------------------+/                                                     <* 
+    *> DEBUG_FILE   yLOG_exit    (__FUNCTION__);                                                    <* 
+    *> /+---(complete)-----------------------+/                                                     <* 
+    *> return 0;                                                                                    <*/
 }
 
 char         /*--> save current theme to runtime ---------[ ------ [ ------ ]-*/
 RUNTIME_report     (void)
 {
-   /*---(locals)-----------+-----------+-*/
-   char        rce         = -10;           /* return code for errors         */
-   char        rc          =   0;           /* generic return code            */
-   char        recd        [LEN_RECD];
-   int         x_len;
-   char       *p;
-   char       *q           = "\x1F";
-   int         i           = 0;
-   int         j           = 0;
-   long        x_num       = 0;
-   char        x_back      [LEN_RECD] = "";
-   char        x_theme     [LEN_RECD] = "";
-   /*---(header)-------------------------*/
-   printf ("\ntheia euryphaessa (wide-shinning) known terminal runtime inventory\n");
-   printf ("\n  --pid-------  -background-------------------  -font-theme-------------------\n");
-   /*---(write runtimes)-----------------*/
-   for (i = 0; i < nruntime; ++i) {
-      if (runtimes [i].back_key == '-')   sprintf (x_back, "-  ------  ------");
-      else                                sprintf (x_back, "%c  %06x  %s", runtimes[i].back_key, runtimes[i].back_hex, runtimes[i].back_name);
-      sprintf (x_theme, "%2s  %-25.25s", runtimes[i].theme_ref, runtimes[i].theme_name);
-      printf ("  %-12d  %-30.30s  %-30.30s\n", runtimes[i].ppid, x_back, x_theme);
-   }
-   /*---(complete)-----------------------*/
-   return 0;
+   /*> /+---(locals)-----------+-----------+-+/                                                                                                <* 
+    *> char        rce         = -10;           /+ return code for errors         +/                                                           <* 
+    *> char        rc          =   0;           /+ generic return code            +/                                                           <* 
+    *> char        recd        [LEN_RECD];                                                                                                     <* 
+    *> int         x_len;                                                                                                                      <* 
+    *> char       *p;                                                                                                                          <* 
+    *> char       *q           = "\x1F";                                                                                                       <* 
+    *> int         i           = 0;                                                                                                            <* 
+    *> int         j           = 0;                                                                                                            <* 
+    *> long        x_num       = 0;                                                                                                            <* 
+    *> char        x_back      [LEN_RECD] = "";                                                                                                <* 
+    *> char        x_theme     [LEN_RECD] = "";                                                                                                <* 
+    *> /+---(header)-------------------------+/                                                                                                <* 
+    *> printf ("\ntheia euryphaessa (wide-shinning) known terminal runtime inventory\n");                                                      <* 
+    *> printf ("\n  --pid-------  -background-------------------  -font-theme-------------------\n");                                          <* 
+    *> /+---(write g_runs)-----------------+/                                                                                                  <* 
+    *> for (i = 0; i < g_nrun; ++i) {                                                                                                          <* 
+    *>    if (g_runs [i].back_key == '-')   sprintf (x_back, "-  ------  ------");                                                             <* 
+    *>    else                                sprintf (x_back, "%c  %06x  %s", g_runs[i].back_key, g_runs[i].back_hex, g_runs[i].back_name);   <* 
+    *>    sprintf (x_theme, "%2s  %-25.25s", g_runs[i].theme_ref, g_runs[i].theme_name);                                                       <* 
+    *>    printf ("  %-12d  %-30.30s  %-30.30s¦", g_runs[i].ppid, x_back, x_theme);                                                            <* 
+    *> }                                                                                                                                       <* 
+    *> /+---(complete)-----------------------+/                                                                                                <* 
+    *> return 0;                                                                                                                               <*/
 }
 
 
@@ -898,7 +600,7 @@ REPORT_wide        (int  a_scheme)
    /*---(overall title)------------------*/
    printf ("\n");
    printf ("heatherly terminal font color matrix (ansi 16 color, 12-bit)");
-   snprintf (t, 60, "scheme [%s] %s", themes  [s_theme].refno, themes  [s_theme].name);
+   snprintf (t, 60, "scheme [%s] %s", g_fores  [my.theme].refno, g_fores  [my.theme].name);
    printf ("%160.160s\n", t);
    printf ("\n");
    /*---(column titles)------------------*/
@@ -940,13 +642,13 @@ REPORT_wide        (int  a_scheme)
          }
          printf ("  ");
          if (battr == 0) {
-            printf ("\e[5;3%d;4%dm   %06x   \e[0m ", findex, findex, themes  [s_theme].hex [fcolor * 2 + 0    ]);
+            printf ("¥[5;3%d;4%dm   %06x   ¥[0m ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
             printf ("  ");
-            printf ("\e[1;3%d;4%dm   %06x   \e[0m ", findex, findex, themes  [s_theme].hex [fcolor * 2 + 1    ]);
+            printf ("¥[1;3%d;4%dm   %06x   ¥[0m ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
          } else {
-            printf ("\e[1;3%d;4%dm   %06x   \e[0m ", findex, findex, themes  [s_theme].hex [fcolor * 2 + 1    ]);
+            printf ("¥[1;3%d;4%dm   %06x   ¥[0m ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
             printf ("  ");
-            printf ("\e[5;3%d;4%dm   %06x   \e[0m ", findex, findex, themes  [s_theme].hex [fcolor * 2 + 0    ]);
+            printf ("¥[5;3%d;4%dm   %06x   ¥[0m ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
          }
          printf ("\n");
       }
@@ -957,7 +659,7 @@ REPORT_wide        (int  a_scheme)
 }
 
 char
-REPORT_single       (char a_fg, char a_bg, char a_style)
+REPORT_single_OLD   (char a_fg, char a_bg, char a_style)
 {
    if (a_fg >= 0 || a_bg >= 0)  printf ("\e[0m");
    if      (a_fg >= 24) { printf ("\e[7;1;3%dm", a_fg - 24);  a_fg -= 16; }
@@ -967,7 +669,7 @@ REPORT_single       (char a_fg, char a_bg, char a_style)
    if      (a_bg >=  8) { printf ("\e[5;4%dm"  , a_bg - 8);               }
    else if (a_bg >=  0) { printf ("\e[4%dm"    , a_bg);                   }
    if (a_style == 1) {
-      switch (themes [s_theme].style) {
+      switch (g_fores [my.theme].style) {
       case 'a'  :  printf (" %-5.5s ", artistic [a_fg]);  break;
       case 'm'  :  printf (" %-5.5s ", mega_txt [a_fg]);  break;
       case 'f'  :  printf (" %-5.5s ", full_txt [a_fg]);  break;
@@ -980,10 +682,55 @@ REPORT_single       (char a_fg, char a_bg, char a_style)
 }
 
 char
+REPORT_single       (char a_fg, char a_bg, char a_style)
+{
+   char        s           [LEN_LABEL] = "";
+   char        t           [LEN_LABEL] = "";
+   /*---(set foreground)-----------------*/
+   if (a_fg >= 0 || a_bg >= 0)  printf ("\e[0m");
+   if      (a_fg >= 24) { printf ("\e[7;1;3%dm", a_fg - 24);  a_fg -= 16; }
+   else if (a_fg >= 16) { printf ("\e[7;3%dm"  , a_fg - 16);  a_fg -= 16; }
+   else if (a_fg >=  8) { printf ("\e[1;3%dm"  , a_fg - 8);               }
+   else if (a_fg >=  0) { printf ("\e[3%dm"    , a_fg);                   }
+   /*---(set background)-----------------*/
+   if      (a_bg >=  8) { printf ("\e[5;4%dm"  , a_bg - 8);               }
+   else if (a_bg >=  0) { printf ("\e[4%dm"    , a_bg);                   }
+   /*---(prepare hex)--------------------*/
+   sprintf (s, "%-6.6x", g_fores [my.theme].hex [a_fg]);
+   sprintf (t, "%-6.6x", g_fores [my.theme].hex [a_bg]);
+   switch (a_style) {
+   case 1 :
+      switch (g_fores [my.theme].style) {
+      case 'a'  :  printf (" %-5.5s ", artistic [a_fg]);  break;
+      case 'm'  :  printf (" %-5.5s ", mega_txt [a_fg]);  break;
+      case 'f'  :  printf (" %-5.5s ", full_txt [a_fg]);  break;
+      case 'c'  :  printf (" %-5.5s ", colo_txt [a_fg]);  break;
+      default   :  printf (" %-5.5s ", comp_txt [a_fg]);  break;
+      }
+      break;
+   case 2 :
+      printf (" %-2.2s %-2.2s ", s, t);
+      break;
+   case 3 :
+      printf (" %-2.2s %-2.2s ", s + 2, t + 2);
+      break;
+   case 4 :
+      printf (" %-2.2s %-2.2s ", s + 4, t + 4);
+      break;
+   default :
+      printf ("       ");
+      break;
+   }
+   if (a_fg >= 0 || a_bg >= 0)  printf ("\e[0m");
+   return 0;
+}
+
+
+char
 REPORT_layout      (char a_fg, char a_style)
 {
    char        b           =    7;
-   char        s           = themes [s_theme].style;
+   char        s           = g_fores [my.theme].style;
    switch (s) {
    case 'a'  :  b = 7;  break;
    case 'm'  :  b = 7;  break;
@@ -991,7 +738,7 @@ REPORT_layout      (char a_fg, char a_style)
    case 'c'  :  b = 6;  break;
    default   :  b = 7;  break;
    }
-   /*> if (themes [s_theme].style != 'c') {                                           <*/
+   /*> if (g_fores [my.theme].style != 'c') {                                           <*/
    printf (" ");
    REPORT_single (a_fg +  8, -1      , a_style);
    if (s == 'c') {
@@ -1015,8 +762,46 @@ REPORT_layout      (char a_fg, char a_style)
    printf (" ");
    /*> REPORT_single (a_fg + 8,        2, a_style);                                   <*/
    /*> REPORT_single (a_fg + 8,        4, a_style);                                   <*/
-   REPORT_single (a_fg + 8,        5, a_style);
-   REPORT_single (a_fg + 8,        7, a_style);
+   /*     0        1        2        3        4        5        6        7   */
+   /*> "d.brn", "d.red", "d.grn", "d.yel", "d.blu", "d.pur", "d.ora", "d.cri",        <*/
+   switch (a_fg) {
+   case 0 :
+      REPORT_single (a_fg    , 2 + 8   , a_style);
+      REPORT_single (a_fg + 8, 2       , a_style);
+      break;
+   case 1 :
+      REPORT_single (a_fg    , 4 + 8   , a_style);
+      REPORT_single (a_fg + 8, 4       , a_style);
+      break;
+   case 6 : /* orange  */
+      REPORT_single (a_fg    , 5 + 8   , a_style);
+      REPORT_single (a_fg + 8, 5       , a_style);
+      break;
+   case 3 : /* yellow  */
+      REPORT_single (a_fg    , 7 + 8   , a_style);
+      REPORT_single (a_fg + 8, 7       , a_style);
+      break;
+   case 2 : /* green   */
+      REPORT_single (a_fg    , 0 + 8   , a_style);
+      REPORT_single (a_fg + 8, 0       , a_style);
+      break;
+   case 4 : /* blue    */
+      REPORT_single (a_fg    , 1 + 8   , a_style);
+      REPORT_single (a_fg + 8, 1       , a_style);
+      break;
+   case 5 : /* purple  */
+      REPORT_single (a_fg    , 6 + 8   , a_style);
+      REPORT_single (a_fg + 8, 6       , a_style);
+      break;
+   case 7 : /* crimson */
+      REPORT_single (a_fg    , 3 + 8   , a_style);
+      REPORT_single (a_fg + 8, 3       , a_style);
+      break;
+   default :
+      REPORT_single (a_fg + 8,        5, a_style);
+      REPORT_single (a_fg + 8,        7, a_style);
+      break;
+   }
    /*> } else {                                                                       <* 
     *>    REPORT_single (a_fg + 8, -1      , a_style);                                <* 
     *>    REPORT_single (a_fg    , a_fg + 8, a_style);                                <* 
@@ -1038,31 +823,6 @@ REPORT_layout      (char a_fg, char a_style)
 
 
 char         /*--> show a narrow display of the scheme ---[ ------ [ ------ ]-*/
-REPORT_quarter     (int  a_scheme)
-{
-   char        i           =   0;
-   char        f           =   0;
-   char        t           [80];
-   printf ("theia-euryphaessa (wide-shinning) terminal configuration for ansi 16-color terms\n");
-   printf ("assortment of consistently nice contrasts           scheme [%s/%c] %s\n", themes  [s_theme].refno, themes [s_theme].style, themes [s_theme].name);
-   printf ("\n");
-   for (i = 0;  i < 8; ++i) {
-      switch (themes [s_theme].style) {
-      case 'a'  :  f = arti_ord [i];  break;
-      case 'm'  :  f = mega_ord [i];  break;
-      case 'f'  :  f = full_ord [i];  break;
-      case 'c'  :  f = colo_ord [i];  break;
-      default   :  f = comp_ord [i];  break;
-      }
-      REPORT_layout (f, 0);
-      REPORT_layout (f, 1);
-      REPORT_layout (f, 0);
-      printf ("\n");
-   }
-   printf ("theia --quarter is my test for color schemes; perform here or i toss it\n");
-}
-
-char         /*--> show a narrow display of the scheme ---[ ------ [ ------ ]-*/
 REPORT_narrow      (int  a_scheme)
 {
    /*---(locals)-----------+-----------+-*/
@@ -1078,7 +838,7 @@ REPORT_narrow      (int  a_scheme)
    /*---(overall title)------------------*/
    printf ("\n");
    printf ("heatherly terminal font color matrix (ansi 16 color, 12-bit)");
-   snprintf (t, 60, "scheme [%s] %s", themes  [s_theme].refno, themes  [s_theme].name);
+   snprintf (t, 60, "scheme [%s] %s", g_fores  [my.theme].refno, g_fores  [my.theme].name);
    printf ("%76.76s\n", t);
    printf ("\n");
    /*---(column titles)------------------*/
@@ -1107,36 +867,36 @@ REPORT_narrow      (int  a_scheme)
          printf ("  ");
          if (battr == 0) {
             /*---(clear back)------------*/
-            printf ("\e[5;3%d;4%dm   %06x   \e[0m   ", findex, 9     , themes  [s_theme].hex [fcolor * 2 + 0    ]);
-            printf ("\e[1;3%d;4%dm   %06x   \e[0m   ", findex, 9     , themes  [s_theme].hex [fcolor * 2 + 1    ]);
+            printf ("¥[5;3%d;4%dm   %06x   ¥[0m   ", findex, 9     , g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
+            printf ("¥[1;3%d;4%dm   %06x   ¥[0m   ", findex, 9     , g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
             printf ("  ");
             /*---(same color swap)-------*/
-            printf ("\e[5;3%d;4%dm   %06x   \e[0m   ", findex, findex, themes  [s_theme].hex [fcolor * 2 + 0    ]);
-            printf ("\e[1;3%d;4%dm   %06x   \e[0m   ", findex, findex, themes  [s_theme].hex [fcolor * 2 + 1    ]);
+            printf ("¥[5;3%d;4%dm   %06x   ¥[0m   ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
+            printf ("¥[1;3%d;4%dm   %06x   ¥[0m   ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
             printf ("  ");
             /*---(black/white fore)------*/
-            printf ("\e[5;3%d;4%dm   %06x   \e[0m   ", 0     , findex, themes  [s_theme].hex [1      * 2 + 0    ]);
-            printf ("\e[1;3%d;4%dm   %06x   \e[0m   ", findex, 0     , themes  [s_theme].hex [fcolor * 2 + 1    ]);
+            printf ("¥[5;3%d;4%dm   %06x   ¥[0m   ", 0     , findex, g_fores  [my.theme].hex [1      * 2 + 0    ]);
+            printf ("¥[1;3%d;4%dm   %06x   ¥[0m   ", findex, 0     , g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
             printf ("  ");
             /*---(black/white back)------*/
-            printf ("\e[5;3%d;4%dm   %06x   \e[0m   ", findex, 7     , themes  [s_theme].hex [fcolor * 2 + 0    ]);
-            printf ("\e[1;3%d;4%dm   %06x   \e[0m   ", 7     , findex, themes  [s_theme].hex [8      * 2 + 1    ]);
+            printf ("¥[5;3%d;4%dm   %06x   ¥[0m   ", findex, 7     , g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
+            printf ("¥[1;3%d;4%dm   %06x   ¥[0m   ", 7     , findex, g_fores  [my.theme].hex [8      * 2 + 1    ]);
          } else {
             /*---(clear back)------------*/
-            printf ("\e[1;3%d;4%dm   %06x   \e[0m   ", findex, 9     , themes  [s_theme].hex [fcolor * 2 + 1    ]);
-            printf ("\e[5;3%d;4%dm   %06x   \e[0m   ", findex, 9     , themes  [s_theme].hex [fcolor * 2 + 0    ]);
+            printf ("¥[1;3%d;4%dm   %06x   ¥[0m   ", findex, 9     , g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
+            printf ("¥[5;3%d;4%dm   %06x   ¥[0m   ", findex, 9     , g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
             printf ("  ");
             /*---(same color swap)-------*/
-            printf ("\e[1;3%d;4%dm   %06x   \e[0m   ", findex, findex, themes  [s_theme].hex [fcolor * 2 + 1    ]);
-            printf ("\e[5;3%d;4%dm   %06x   \e[0m   ", findex, findex, themes  [s_theme].hex [fcolor * 2 + 0    ]);
+            printf ("¥[1;3%d;4%dm   %06x   ¥[0m   ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
+            printf ("¥[5;3%d;4%dm   %06x   ¥[0m   ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
             printf ("  ");
             /*---(black/white fore)------*/
-            printf ("\e[1;3%d;4%dm   %06x   \e[0m   ", findex, 0     , themes  [s_theme].hex [fcolor * 2 + 1    ]);
-            printf ("\e[5;3%d;4%dm   %06x   \e[0m   ", 0     , findex, themes  [s_theme].hex [1      * 2 + 0    ]);
+            printf ("¥[1;3%d;4%dm   %06x   ¥[0m   ", findex, 0     , g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
+            printf ("¥[5;3%d;4%dm   %06x   ¥[0m   ", 0     , findex, g_fores  [my.theme].hex [1      * 2 + 0    ]);
             printf ("  ");
             /*---(black/white back)------*/
-            printf ("\e[1;3%d;4%dm   %06x   \e[0m   ", 7     , findex, themes  [s_theme].hex [8      * 2 + 1    ]);
-            printf ("\e[5;3%d;4%dm   %06x   \e[0m   ", findex, 7     , themes  [s_theme].hex [fcolor * 2 + 0    ]);
+            printf ("¥[1;3%d;4%dm   %06x   ¥[0m   ", 7     , findex, g_fores  [my.theme].hex [8      * 2 + 1    ]);
+            printf ("¥[5;3%d;4%dm   %06x   ¥[0m   ", findex, 7     , g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
          }
          printf ("\n");
       }
@@ -1162,7 +922,7 @@ REPORT_tiny        (int  a_scheme)
    /*---(overall title)------------------*/
    printf ("\n");
    printf ("theia, the heatherly terminal configuration system for ansi 16 x 12-bit color setups\n");
-   snprintf (t, 60, "scheme [%s] %s", themes  [s_theme].refno, themes  [s_theme].name);
+   snprintf (t, 60, "scheme [%s] %s", g_fores  [my.theme].refno, g_fores  [my.theme].name);
    printf ("%s : %-47.47s%30.30s\n", P_VERNUM, P_VERTXT, t);
    /*---(cycle colors)-------------------*/
    for (fcolor = 1; fcolor < MAX_COLOR; ++fcolor) {
@@ -1174,36 +934,36 @@ REPORT_tiny        (int  a_scheme)
       for (battr = 0; battr <= 5; battr += 5) {
          if (battr == 0) {
             /*---(clear back)------------*/
-            printf ("\e[5;3%d;4%dm %06x \e[0m"   , findex, 9     , themes  [s_theme].hex [fcolor * 2 + 0    ]);
-            printf ("\e[1;3%d;4%dm %06x \e[0m"   , findex, 9     , themes  [s_theme].hex [fcolor * 2 + 1    ]);
+            printf ("¥[5;3%d;4%dm %06x ¥[0m"   , findex, 9     , g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
+            printf ("¥[1;3%d;4%dm %06x ¥[0m"   , findex, 9     , g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
             printf (" ");
             /*---(same color swap)-------*/
-            printf ("\e[5;3%d;4%dm  %06x  \e[0m ", findex, findex, themes  [s_theme].hex [fcolor * 2 + 0    ]);
-            printf ("\e[1;3%d;4%dm  %06x  \e[0m ", findex, findex, themes  [s_theme].hex [fcolor * 2 + 1    ]);
+            printf ("¥[5;3%d;4%dm  %06x  ¥[0m ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
+            printf ("¥[1;3%d;4%dm  %06x  ¥[0m ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
             printf (" ");
             /*---(black/white fore)------*/
-            printf ("\e[5;3%d;4%dm  %06x  \e[0m ", 0     , findex, themes  [s_theme].hex [1      * 2 + 0    ]);
-            printf ("\e[1;3%d;4%dm  %06x  \e[0m ", findex, 0     , themes  [s_theme].hex [fcolor * 2 + 1    ]);
+            printf ("¥[5;3%d;4%dm  %06x  ¥[0m ", 0     , findex, g_fores  [my.theme].hex [1      * 2 + 0    ]);
+            printf ("¥[1;3%d;4%dm  %06x  ¥[0m ", findex, 0     , g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
             printf (" ");
             /*---(black/white back)------*/
-            printf ("\e[5;3%d;4%dm  %06x  \e[0m ", findex, 7     , themes  [s_theme].hex [fcolor * 2 + 0    ]);
-            printf ("\e[1;3%d;4%dm  %06x  \e[0m ", 7     , findex, themes  [s_theme].hex [8      * 2 + 1    ]);
+            printf ("¥[5;3%d;4%dm  %06x  ¥[0m ", findex, 7     , g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
+            printf ("¥[1;3%d;4%dm  %06x  ¥[0m ", 7     , findex, g_fores  [my.theme].hex [8      * 2 + 1    ]);
          } else {
             /*---(clear back)------------*/
-            printf ("\e[1;3%d;4%dm %06x \e[0m"   , findex, 9     , themes  [s_theme].hex [fcolor * 2 + 1    ]);
-            printf ("\e[5;3%d;4%dm %06x \e[0m"   , findex, 9     , themes  [s_theme].hex [fcolor * 2 + 0    ]);
+            printf ("¥[1;3%d;4%dm %06x ¥[0m"   , findex, 9     , g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
+            printf ("¥[5;3%d;4%dm %06x ¥[0m"   , findex, 9     , g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
             printf (" ");
             /*---(same color swap)-------*/
-            printf ("\e[1;3%d;4%dm  %06x  \e[0m ", findex, findex, themes  [s_theme].hex [fcolor * 2 + 1    ]);
-            printf ("\e[5;3%d;4%dm  %06x  \e[0m ", findex, findex, themes  [s_theme].hex [fcolor * 2 + 0    ]);
+            printf ("¥[1;3%d;4%dm  %06x  ¥[0m ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
+            printf ("¥[5;3%d;4%dm  %06x  ¥[0m ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
             printf (" ");
             /*---(black/white fore)------*/
-            printf ("\e[1;3%d;4%dm  %06x  \e[0m ", findex, 0     , themes  [s_theme].hex [fcolor * 2 + 1    ]);
-            printf ("\e[5;3%d;4%dm  %06x  \e[0m ", 0     , findex, themes  [s_theme].hex [1      * 2 + 0    ]);
+            printf ("¥[1;3%d;4%dm  %06x  ¥[0m ", findex, 0     , g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
+            printf ("¥[5;3%d;4%dm  %06x  ¥[0m ", 0     , findex, g_fores  [my.theme].hex [1      * 2 + 0    ]);
             printf (" ");
             /*---(black/white back)------*/
-            printf ("\e[1;3%d;4%dm  %06x  \e[0m ", 7     , findex, themes  [s_theme].hex [8      * 2 + 1    ]);
-            printf ("\e[5;3%d;4%dm  %06x  \e[0m ", findex, 7     , themes  [s_theme].hex [fcolor * 2 + 0    ]);
+            printf ("¥[1;3%d;4%dm  %06x  ¥[0m ", 7     , findex, g_fores  [my.theme].hex [8      * 2 + 1    ]);
+            printf ("¥[5;3%d;4%dm  %06x  ¥[0m ", findex, 7     , g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
          }
          printf ("\n");
       }
@@ -1220,16 +980,16 @@ REPORT_line        (char a_line, char a_bg)
    int         u           = 0xf8f8f8;
    int         v           = 0xf8f8f8;
    int         i           =    0;
-   u = themes [s_theme].hex [(a_bg + 1) * 2 + 0];
-   v = themes [s_theme].hex [(a_bg + 1) * 2 + 1];
+   u = g_fores [my.theme].hex [(a_bg + 1) * 2 + 0];
+   v = g_fores [my.theme].hex [(a_bg + 1) * 2 + 1];
    if (a_line == 1) {
       printf ("\n");
       printf ("\e[3%dm%06x - %-8.8s (%c)\e[0m\n", a_bg, u, cname [a_bg], abbr [a_bg]);
    }
    printf ("  ");
    for (i = 0; i < 8; ++i) {
-      s = themes  [s_theme].hex [(i + 1) * 2 + 0];
-      t = themes  [s_theme].hex [(i + 1) * 2 + 1];
+      s = g_fores  [my.theme].hex [(i + 1) * 2 + 0];
+      t = g_fores  [my.theme].hex [(i + 1) * 2 + 1];
       switch (a_line) {
       case 1 : case 3 :
          printf ("\e[3%d;4%dm            \e[0m "  , i, a_bg);
@@ -1266,8 +1026,8 @@ REPORT_line2       (char a_line, char a_bg)
    int         v           = 0xf8f8f8;
    int         i           =    0;
    int         f, b;
-   u = themes [s_theme].hex [(a_bg + 1) * 2 + 0];
-   v = themes [s_theme].hex [(a_bg + 1) * 2 + 1];
+   u = g_fores [my.theme].hex [(a_bg + 1) * 2 + 0];
+   v = g_fores [my.theme].hex [(a_bg + 1) * 2 + 1];
    if (a_line == 1) {
       printf ("\n");
       printf ("\e[3%dm%06x - %-8.8s (%c)\e[0m\n", a_bg, u, cname [a_bg], abbr [a_bg]);
@@ -1275,8 +1035,8 @@ REPORT_line2       (char a_line, char a_bg)
    printf ("  ");
    for (i = 0; i < 11; ++i) {
       if (i < 8) {
-         s = themes  [s_theme].hex [(i + 1) * 2 + 0];
-         t = themes  [s_theme].hex [(i + 1) * 2 + 1];
+         s = g_fores  [my.theme].hex [(i + 1) * 2 + 0];
+         t = g_fores  [my.theme].hex [(i + 1) * 2 + 1];
          f = i;
          b = a_bg;
       } else if (i == 8) {
@@ -1398,7 +1158,7 @@ REPORT_every       (int  a_scheme)
    char        fprefix     [20];
    /*---(overall title)------------------*/
    printf ("\n");
-   snprintf (t, 60, "scheme [%s] %s", themes  [s_theme].refno, themes  [s_theme].name);
+   snprintf (t, 60, "scheme [%s] %s", g_fores  [my.theme].refno, g_fores  [my.theme].name);
    printf ("%s         %s\n", P_ONELINE, t);
    /*> printf ("--every   %s : %-47.47s%30.30s\n", P_VERNUM, P_VERTXT, t);            <*/
    /*---(cycle colors)-------------------*/
@@ -1466,7 +1226,7 @@ REPORT_fullsome    (int  a_scheme)
    char        fprefix     [20];
    /*---(overall title)------------------*/
    printf ("\n");
-   snprintf (t, 60, "scheme [%s] %s", themes  [s_theme].refno, themes  [s_theme].name);
+   snprintf (t, 60, "scheme [%s] %s", g_fores  [my.theme].refno, g_fores  [my.theme].name);
    printf ("%s         %s\n", P_ONELINE, t);
    /*> printf ("--every   %s : %-47.47s%30.30s\n", P_VERNUM, P_VERTXT, t);            <*/
    /*---(cycle colors)-------------------*/
@@ -1522,387 +1282,9 @@ REPORT_fullsome    (int  a_scheme)
 
 
 /*====================------------------------------------====================*/
-/*===----                            program                           ----===*/
-/*====================------------------------------------====================*/
-void  o___PROGRAM_________o () { return; }
-
-char*        /*--> return versioning information ---------[ ------ [ ------ ]-*/
-PROG_version       (void)
-{
-   char    t [20] = "";
-#if    __TINYC__ > 0
-   strncpy (t, "[tcc built]", 15);
-#elif  __GNUC__  > 0
-   strncpy (t, "[gnu gcc  ]", 15);
-#elif  __CBANG__  > 0
-   strncpy (t, "[cbang    ]", 15);
-#else
-   strncpy (t, "[unknown  ]", 15);
-#endif
-   snprintf (verstring, 100, "%s   %s : %s", t, P_VERNUM, P_VERTXT);
-   return verstring;
-}
-
-
-
-/*====================------------------------------------====================*/
-/*===----                       pre-initialization                     ----===*/
-/*====================------------------------------------====================*/
-static void      o___PREINIT_________________o (void) {;}
-
-char
-PROG_urgents            (int a_argc, char *a_argv [])
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   char        rc          =    0;
-   /*---(header)-------------------------*/
-   DEBUG_PROG  yLOG_enter   (__FUNCTION__);
-   /*---(set mute)-----------------------*/
-   yURG_all_mute ();
-   /*---(start logger)-------------------*/
-   rc = yURG_logger  (a_argc, a_argv);
-   DEBUG_PROG   yLOG_value    ("logger"    , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(process urgents)----------------*/
-   rc = yURG_urgs    (a_argc, a_argv);
-   DEBUG_PROG   yLOG_value    ("logger"    , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(complete)-----------------------*/
-   DEBUG_PROG  yLOG_exit  (__FUNCTION__);
-   return rc;
-}
-
-char         /*--> initialize variables ------------------[ ------ [ ------ ]-*/
-PROG_init          (void)
-{
-   /*---(locals)-------------------------*/
-   int         i           = 0;             /* iterator -- structure entry    */
-   int         j           = 0;             /* iterator -- color entry        */
-   /*---(log header)---------------------*/
-   DEBUG_PROG   yLOG_info     ("purpose" , P_PURPOSE);
-   DEBUG_PROG   yLOG_info     ("namesake", P_NAMESAKE);
-   DEBUG_PROG   yLOG_info     ("heritage", P_HERITAGE);
-   DEBUG_PROG   yLOG_info     ("imagery" , P_IMAGERY);
-   DEBUG_PROG   yLOG_info     ("theia"   , PROG_version ());
-   DEBUG_PROG   yLOG_info     ("yURG"    , yURG_version      ());
-   DEBUG_PROG   yLOG_info     ("ySTR"    , ySTR_version      ());
-   DEBUG_PROG   yLOG_info     ("yLOG"    , yLOGS_version     ());
-   /*---(header)-------------------------*/
-   DEBUG_PROG   yLOG_enter    (__FUNCTION__);
-   /*---(runtime)------------------------*/
-   nruntime = 0;
-   for (i = 0; i < MAX_RUNTIME; ++i) {
-      runtimes [i].ppid       = -1;
-      runtimes [i].when       = -1;
-      runtimes [i].back_key   = '-';
-      runtimes [i].back_hex   = 0;
-      strcpy (runtimes [i].theme_ref , "00");
-      strcpy (runtimes [i].theme_name, "unknown");
-   }
-   /*---(runtime)------------------------*/
-   ntheme  = 0;
-   for (i = 0; i < MAX_SCHEME ; ++i) {
-      strcpy (themes   [i].refno, "00");
-      strcpy (themes   [i].name , "--");
-      for (j = 0; j < MAX_ENTRIES ; ++j) {
-         themes   [i].hex [j]   = -1;
-      }
-   }
-   /*---(initialize)---------------------*/
-   s_theme = 0;
-   s_back  = 0;
-   nback   = 1;
-   /*---(complete)-----------------------*/
-   DEBUG_PROG   yLOG_exit     (__FUNCTION__);
-   return 0;
-}
-
-/*> char         /+--> process the command line urgents ------[ ------ [ ------ ]-+/      <* 
- *> PROG_urgs          (int argc, char *argv[])                                           <* 
- *> {                                                                                     <* 
- *>    /+---(locals)-------------------------+/                                           <* 
- *>    char       *a           = NULL;          /+ current argument               +/      <* 
- *>    int         i           = 0;             /+ loop iterator -- arguments     +/      <* 
- *>    int         len         = 0;             /+ argument length                +/      <* 
- *>    int         x_total     = 0;             /+ total args looked at           +/      <* 
- *>    int         x_urgs      = 0;             /+ num args identified as urgs    +/      <* 
- *>    /+---(header)-------------------------+/                                           <* 
- *>    DEBUG_PROG   yLOG_enter    (__FUNCTION__);                                         <* 
- *>    /+---(logger in silent)---------------+/                                           <* 
- *>    my.logger    = yLOGS_begin (argv[0], YLOG_SYS, YLOG_QUIET);                        <* 
- *>    /+---(process)------------------------+/                                           <* 
- *>    for (i = 1; i < argc; ++i) {                                                       <* 
- *>       /+---(get next)--------------------+/                                           <* 
- *>       a = argv[i];                                                                    <* 
- *>       ++x_total;                                                                      <* 
- *>       if      (a[0] != '@')                     continue;                             <* 
- *>       len = strlen (a);                                                               <* 
- *>       DEBUG_ARGS   yLOG_info  ("urgent", a);                                          <* 
- *>       ++x_urgs;                                                                       <* 
- *>       /+---(handle urgent)---------------+/                                           <* 
- *>       if      (strcmp(a, "@t"        ) == 0)    debug.tops                = 'y';      <* 
- *>       else if (strcmp(a, "@@tops"    ) == 0)    debug.tops                = 'y';      <* 
- *>       else if (strcmp(a, "@c"        ) == 0)    debug.tops  = debug.args  = 'y';      <* 
- *>       else if (strcmp(a, "@@args"    ) == 0)    debug.tops  = debug.args  = 'y';      <* 
- *>       else if (strcmp(a, "@x"        ) == 0)    debug.tops  = debug.prep  = 'y';      <* 
- *>       else if (strcmp(a, "@@prep"    ) == 0)    debug.tops  = debug.prep  = 'y';      <* 
- *>       else if (strcmp(a, "@f"        ) == 0)    debug.tops  = debug.file  = 'y';      <* 
- *>       else if (strcmp(a, "@@file"    ) == 0)    debug.tops  = debug.file  = 'y';      <* 
- *>       else if (strcmp(a, "@g"        ) == 0)    debug.tops  = debug.graf  = 'y';      <* 
- *>       else if (strcmp(a, "@@graf"    ) == 0)    debug.tops  = debug.graf  = 'y';      <* 
- *>       else if (strcmp(a, "@o"        ) == 0)    debug.tops  = debug.outp  = 'y';      <* 
- *>       else if (strcmp(a, "@@outp"    ) == 0)    debug.tops  = debug.outp  = 'y';      <* 
- *>       else if (strcmp(a, "@p"        ) == 0)    debug.tops  = debug.proc  = 'y';      <* 
- *>       else if (strcmp(a, "@@proc"    ) == 0)    debug.tops  = debug.proc  = 'y';      <* 
- *>       /+---(logging)---------------------+/                                           <* 
- *>       else if (strncmp (a, "@@log"    ,10) == 0) {                                    <* 
- *>          debug.tops = 'y';                                                            <* 
- *>          yLOGS_end   ();                                                              <* 
- *>          my.logger = yLOGS_begin (argv[0], YLOG_SYS, YLOG_NOISE);                     <* 
- *>          if (my.logger < 1) {                                                         <* 
- *>             printf ("%s : can not start logger in noise mode, FATAL\n", argv[0]);     <* 
- *>             exit(1);                                                                  <* 
- *>          }                                                                            <* 
- *>          yLOG_info  ("purpose",  "gorgeous, flexible terminal color configurator");   <* 
- *>          yLOG_info  ("theia"  ,  PROG_version ());                                    <* 
- *>          yLOG_info  ("yLOG"   ,  yLOGS_version ());                                   <* 
- *>          DEBUG_PROG   yLOG_enter (__FUNCTION__);                                      <* 
- *>          DEBUG_ARGS   yLOG_info  ("urgent", a);                                       <* 
- *>       }                                                                               <* 
- *>       /+---(done)------------------------+/                                           <* 
- *>    }                                                                                  <* 
- *>    /+---(summarize)----------------------+/                                           <* 
- *>    DEBUG_ARGS   yLOG_value  ("entries"   , x_total);                                  <* 
- *>    DEBUG_ARGS   yLOG_value  ("urgents"   , x_urgs);                                   <* 
- *>    /+---(complete)-----------------------+/                                           <* 
- *>    DEBUG_PROG   yLOG_exit  (__FUNCTION__);                                            <* 
- *>    return 0;                                                                          <* 
- *> }                                                                                     <*/
-
-char         /*--> process the command line arguments ----[ ------ [ ------ ]-*/
-PROG_args          (int argc, char *argv[])
-{
-   /*---(locals)-------------------------*/
-   char     *a         = NULL;         /* current argument                    */
-   int       i         = 0;            /* loop iterator -- arguments          */
-   int       len       = 0;            /* argument length                     */
-   int         x_total     = 0;             /* total args looked at           */
-   int         x_args      = 0;             /* num args identified            */
-   int         j           = 0;             /* iterator -- string position    */
-   int         x_num       = 0;
-   int         x_place     = 0;
-   int         x_mult      = 0;
-   /*---(begin)--------------------------*/
-   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
-   /*---(prepare)------------------------*/
-   s_report = '-';
-   strcpy (s_refnum, "00");
-   /*---(process)------------------------*/
-   for (i = 1; i < argc; ++i) {
-      /*---(get next)--------------------*/
-      a = argv[i];
-      ++x_total;
-      if      (a[0] == '@')                     continue;
-      len = strlen(a);
-      DEBUG_ARGS   yLOG_info  ("argument"  , a);
-      ++x_args;
-      /*---(reporting)-------------------*/
-      if      (strcmp (a, "-w"        ) == 0)    s_report = 'w';
-      else if (strcmp (a, "--wide"    ) == 0)    s_report = 'w';
-      else if (strcmp (a, "-e"        ) == 0)    s_report = 'e';
-      else if (strcmp (a, "--every"   ) == 0)    s_report = 'e';
-      else if (strcmp (a, "-n"        ) == 0)    s_report = 'n';
-      else if (strcmp (a, "--narrow"  ) == 0)    s_report = 'n';
-      else if (strcmp (a, "-t"        ) == 0)    s_report = 't';
-      else if (strcmp (a, "--tiny"    ) == 0)    s_report = 't';
-      else if (strcmp (a, "-b"        ) == 0)    s_report = 'b';
-      else if (strcmp (a, "--backs"   ) == 0)    s_report = 'b';
-      else if (strcmp (a, "-r"        ) == 0)    s_report = 'r';
-      else if (strcmp (a, "--runtime" ) == 0)    s_report = 'r';
-      else if (strcmp (a, "-f"        ) == 0)    s_report = 'f';
-      else if (strcmp (a, "--fullsome") == 0)    s_report = 'f';
-      else if (strcmp (a, "-q"        ) == 0)    s_report = '!';
-      else if (strcmp (a, "--quarter" ) == 0)    s_report = '!';
-      else if (strcmp (a, "--spin"    ) == 0)    s_backno = '*';
-      else if (strcmp (a, "--export"  ) == 0)    s_report = 'x';
-      /*---(font number)-----------------*/
-      else if (len == 1 && a[0] >= 'a' && a[0] <= 'z') s_backno = a[0];
-      else if (len == 1 && a[0] >= 'A' && a[0] <= 'Z') s_backno = a[0];
-      else if (len == 2 && strchr ("0123456789abcdef", a[0]) != 0 &&
-            strchr ("0123456789abcdef", a[1]) != 0)
-         strcpy (s_refnum, a);
-      else if (len == 6 && a[0] != '-') {
-         for (j = 0; j < 6; ++j) {
-            if (strchr ("0123456789abcdef", a[j]) != 0)  continue;
-            break;
-         }
-         if (j == 6) {
-            x_num  = 0;
-            x_mult = 1;
-            for (j = 5; j >= 0; --j) {
-               if (a[j] >= '0' && a[j] <= '9')  x_place = a[j] - '0';
-               if (a[j] >= 'a' && a[j] <= 'f')  x_place = a[j] - 'a' + 10;
-               if (a[j] >= 'A' && a[j] <= 'F')  x_place = a[j] - 'A' + 10;
-               x_num  += x_place * x_mult;
-               x_mult *= 16;
-            }
-            if (x_num >=  0  && x_num <=  16777215) {
-               s_custom = x_num;
-            }
-         }
-      }
-      /*---(unknown)---------------------*/
-      else    printf("requested action not understood or incomplete\n");
-   }
-   /*---(summarize)----------------------*/
-   DEBUG_ARGS   yLOG_value  ("entries"   , x_total);
-   DEBUG_ARGS   yLOG_value  ("arguments" , x_args);
-   /*---(complete)-----------------------*/
-   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-char         /*--> final initialization steps ------------[ ------ [ ------ ]-*/
-PROG_begin         (void)
-{
-   /*---(begin)--------------------------*/
-   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
-   /*---(complete)-----------------------*/
-   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-
-
-/*====================------------------------------------====================*/
 /*===----                            driver                            ----===*/
 /*====================------------------------------------====================*/
 void  o___DRIVER__________o () { return; }
-
-int
-main               (int argc, char *argv[])
-{
-   /*---(locals)-----------+-----------+-*/
-   char        rce         = -10;           /* return code for errors         */
-   char        rc          =   0;           /* generic return code            */
-   int         x_log       =   0;           /* logger id                      */
-   int         x_ppid      =   0;
-   char        x_back      =   '-';
-   char        x_theme     [ 5]   = "00";
-   int         i           =   0;
-   int         j           =   0;
-   char        t           [LEN_HUND]  = "";
-   /*---(preprare)-----------------------*/
-   if (rc >= 0) {
-      rc = PROG_urgents (argc, argv);
-      DEBUG_PROG   yLOG_value   ("urgents"   , rc);
-   }
-   /*---(header)-------------------------*/
-   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
-   /*---(startup)------------------------*/
-   if (rc >= 0) {
-      rc = PROG_init    ();
-      DEBUG_PROG   yLOG_value   ("init"      , rc);
-   }
-   if (rc >= 0) {
-      rc = PROG_args    (argc, argv);
-      DEBUG_PROG   yLOG_value   ("args"      , rc);
-   }
-   if (rc >= 0) {
-      rc = PROG_begin   ();
-      DEBUG_PROG   yLOG_value   ("begin"     , rc);
-   }
-   --rce;  if (rc <  0) {
-      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(find eterm or hestia)-----------*/
-   DEBUG_PROG   yLOG_note    ("before runtime_read");
-   rc = RUNTIME_read  ();
-   DEBUG_PROG   yLOG_value   ("read"      , rc);
-   /*> --rce;  if (rc < 0) {                                                          <* 
-    *>    DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);                              <* 
-    *>    return rce;                                                                 <* 
-    *> }                                                                              <*/
-      /*> printf ("before TERM_find\n");                                              <*/
-   rc = TERM_find (getppid(), &x_ppid);
-   DEBUG_PROG   yLOG_value   ("term_find" , rc);
-   --rce;  if (rc < 0)                 return rce;
-   for (i = 0; i < nruntime; ++i) {
-      if (x_ppid != runtimes [i].ppid)  continue;
-      x_back =  runtimes[i].back_key;
-      strcpy (x_theme, runtimes [i].theme_ref);
-      break;
-   }
-      /*> printf ("before SCHEMES_read\n");                                           <*/
-   /*---(get schemes)--------------------*/
-   rc = SCHEMES_read ();
-   DEBUG_PROG   yLOG_value   ("schemes"   , rc);
-   if (strcmp ("00", s_refnum) != 0)     THEME_find   (s_refnum);
-   if (strchr ("*-", s_backno) == NULL)  BACK_find    (s_backno);
-   /*---(set environment)----------------*/
-   if (s_report == 'x' && s_back   >  0)  {
-      printf ("export theia_tint=\"%c § %-5.5s § %-12.12s § %-16.16s § %06x §\";\n",
-            backs [s_back].key , backs [s_back].abbr, backs [s_back].color,
-            backs [s_back].name, backs [s_back].hex);
-      /*> printf ("export theia_1_abbr=%c;\n" , backs [s_back].key);                  <* 
-       *> printf ("export theia_2_color=%s\n", backs [s_back].color);                 <* 
-       *> printf ("export theia_3_hex=%06x;\n", backs [s_back].hex);                  <*/
-   }
-   if (s_report == 'x' && s_theme  > 0)  {
-      printf ("export theia_text=\"%c § %-2.2s § %-16.16s §\";\n",
-            themes [s_theme].style, themes [s_theme].refno , themes [s_theme].name);
-      /*> printf ("export theia_5_ref=%s;\n"  , themes [s_theme].refno);              <* 
-       *> printf ("export theia_6_name=%s;\n" , themes [s_theme].name);               <* 
-       *> printf ("export theia_7_style=%c;\n", themes [s_theme].style);              <*/
-   }
-   if (s_report == 'x')  return 0;
-   /*---(set back)-----------------------*/
-   if (s_backno == '*') {
-      for (i = 1; i < nback; ++i) {
-         BACK_find    (s_backs [i]);
-         BACK_set      ();
-         printf ("%c  %s\n", backs [i].key, backs [i].name);
-         sleep (1);
-      }
-      return 0;
-   }
-   if (s_back   >  0)  {
-      BACK_set      ();
-      RUNTIME_write ();
-   }
-   if (s_custom >= 0)  {
-      BACK_custom   ();
-      RUNTIME_write ();
-   }
-   /*---(set theme)----------------------*/
-   if (s_theme  > 0)  {
-      THEME_set     ();
-      RUNTIME_write ();
-   }
-   /*---(display)------------------------*/
-   if (strcmp ("00", s_refnum) == 0)   THEME_find   (x_theme);
-   if (s_backno == '-')                BACK_find    (x_back);
-   if      (s_report == 'w')  REPORT_wide    (s_theme );
-   else if (s_report == 'e')  REPORT_every   (s_theme );
-   else if (s_report == 'f')  REPORT_fullsome(s_theme );
-   else if (s_report == 'n')  REPORT_narrow  (s_theme );
-   else if (s_report == '!')  REPORT_quarter (s_theme );
-   else if (s_report == 't')  REPORT_tiny    (s_theme );
-   else if (s_report == 'b')  BACK_report    ();
-   else if (s_report == 'r')  RUNTIME_report ();
-   /*---(complete)-----------------------*/
-   DEBUG_PROG  yLOG_exit    (__FUNCTION__);
-   yLOGS_end     ();
-   return 0;
-}
 
 
 
