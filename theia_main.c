@@ -31,6 +31,11 @@ main               (int a_argc, char *a_argv [])
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   /*---(catch up fifo)------------------*/
+   /*> rc = FIFO_listen (FILE_FIFO);                                                  <*/
+   /*> rc = FIFO_eater (FILE_FIFO);                                                   <*/
+   rc = FIFO_eater ("/tmp/xprop.txt");
+   DEBUG_PROG   yLOG_value    ("listen"    , rc);
    /*---(run)----------------------------*/
    if (my.back_req != '·') {
       BACK_set (my.back_req);
@@ -38,8 +43,11 @@ main               (int a_argc, char *a_argv [])
    if (strcmp (my.fore_req, "·") != NULL) {
       FORE_set (my.fore_req);
    }
-   if (my.report != '·') {
-      if (my.report == '!')  REPORT_quarter (my.fore_act);
+   switch (my.report) {
+   case  '·' : break;
+   case  '!' : REPORT_quarter (my.fore_act);      break;
+   case  'p' : PAGE_single ();                    break;
+   case  'P' : PAGE_multi  ();                    break;
    }
    if (strcmp (my.shortcut, "") != 0) {
       DEBUG_PROG   yLOG_note     ("running a goto");
@@ -61,7 +69,7 @@ main               (int a_argc, char *a_argv [])
    /*---(complete)-----------------------*/
    return rc;
 }
-        
+
 
 char
 main_OLD           (int a_argc, char *a_argv [])

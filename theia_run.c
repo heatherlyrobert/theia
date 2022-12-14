@@ -27,7 +27,9 @@ RUN_purge               (void)
       strlcpy (g_runs [i].back , "·", LEN_TERSE);
       strlcpy (g_runs [i].fore , "·", LEN_TERSE);
       /*---(window)---------*/
+      strlcpy (g_runs [i].hex  , "·", LEN_LABEL);
       g_runs [i].ref       =  0;
+      g_runs [i].stack     = -1;
       g_runs [i].desk      =  0;
       strlcpy (g_runs [i].title, "·", LEN_HUND);
       g_runs [i].type      = '·';
@@ -44,6 +46,7 @@ RUN_purge               (void)
       g_runs [i].use       =  0;
       strlcpy (g_runs [i].pubname, "·", LEN_LABEL);
       strlcpy (g_runs [i].cmdline, "·", LEN_RECD);
+      g_runs [i].order     =  0;
       /*---(done)-----------*/
    }
    g_nrun  = 0;
@@ -127,13 +130,20 @@ RUN__create             (cchar a_match, cchar a_recd [LEN_RECD])
    char        rce         =  -10;
    char        rc          =    0;
    char        x_recd      [LEN_RECD]  = "";
-   char        t           [LEN_LABEL] = "";
+   char        x_field     [LEN_LABEL] = "";
    char       *p           = NULL;
    char       *q           = "§";
-   int         x_eterm     =    0;
    int         l           =    0;
    int         c           =    0;
    int         n           =    0;
+   double      v           =  0.0;
+   int         x_eterm     =    0;
+   char        x_back      [LEN_TERSE] = "";
+   char        x_fore      [LEN_TERSE] = "";
+   char        x_hex       [LEN_LABEL] = "";
+   long        x_ref       =    0;
+   char        x_stack     =   -1;
+   char        x_exist     =    0;
    /*---(header)-------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -150,14 +160,15 @@ RUN__create             (cchar a_match, cchar a_recd [LEN_RECD])
    n = g_nrun;
    /*---(parse record)----------------*/
    --rce;  while (p != NULL) {
-      strlcpy  (t, p, LEN_LABEL);
-      strltrim (t, ySTR_BOTH, LEN_LABEL);
-      l = strlen (t);
-      DEBUG_CONF   yLOG_complex ("parse"     , "%d, %2då%sæ", c, l, t);
+      strlcpy  (x_field, p, LEN_LABEL);
+      strltrim (x_field, ySTR_BOTH, LEN_LABEL);
+      l = strlen (x_field);
+      DEBUG_CONF   yLOG_complex ("parse"     , "%d, %2då%sæ", c, l, x_field);
       switch (c) {
       case  0 :  /* eterm rpid           */
          if (l < 3)  { rc = --rce; break; }
          x_eterm = atoi (p);
+         DEBUG_CONF   yLOG_value   ("x_eterm"   , x_eterm);
          if (x_eterm == 0)  { rc = --rce;  break; }
          rc = RUN_by_eterm (x_eterm);
          DEBUG_CONF   yLOG_value   ("by_eterm"  , rc);
@@ -168,30 +179,55 @@ RUN__create             (cchar a_match, cchar a_recd [LEN_RECD])
          }
          if (rc >= 0) n = rc;
          rc = 0;
-         g_runs [n].eterm = x_eterm;
-         DEBUG_CONF   yLOG_value   ("eterm"     , g_runs [n].eterm);
          break;
       case  1 :  /* background           */
          if (l != 6)  {
-            if (strcmp (t, "·") == 0) {
+            if (strcmp (x_field, "·") == 0) {
                DEBUG_CONF   yLOG_note    ("default value");
             } else { rc = --rce; break; }
          }
-         strlcpy  (g_runs [n].back, t, LEN_TERSE);
-         DEBUG_CONF   yLOG_info    ("back"      , g_runs [n].back);
+         strlcpy  (x_back, x_field, LEN_TERSE);
+         DEBUG_CONF   yLOG_info    ("x_back"    , x_back);
          break;
       case  2 :  /* foreground           */
          if (l != 2)  {
-            if (strcmp (t, "·") == 0) {
+            if (strcmp (x_field, "·") == 0) {
                DEBUG_CONF   yLOG_note    ("default value");
             } else { rc = --rce; break; }
          }
-         strlcpy  (g_runs [n].fore, t, LEN_TERSE);
-         DEBUG_CONF   yLOG_info    ("fore"      , g_runs [n].fore);
+         strlcpy  (x_fore, x_field, LEN_TERSE);
+         DEBUG_CONF   yLOG_info    ("x_fore"    , x_fore);
          break;
       case  3 :  /* window reference     */
-         g_runs [n].ref = atoi (t);
-         DEBUG_CONF   yLOG_value   ("ref"       , g_runs [n].ref);
+         if (l == 0 || strcmp (x_field, "·") == 0) {
+            DEBUG_CONF   yLOG_note    ("default value");
+            break;
+         } else if (x_field [0] == 'õ') {
+            DEBUG_CONF   yLOG_note    ("hex value");
+            strlcpy  (x_hex , x_field, LEN_LABEL);
+            strldchg (x_hex , '0', '·', LEN_LABEL);
+            if (x_hex [3] == '·')  x_hex [3] = '0';
+            strldchg (x_field, '·', '0', LEN_LABEL);
+            strl2hex (x_field, &v, LEN_LABEL);
+            x_ref = v;
+         } else {
+            DEBUG_CONF   yLOG_note    ("long value");
+            x_ref = atoi (x_field);
+         }
+         /*> if (RUN_by_ref (g_runs [n].ref) >= 0)  {                                 <* 
+          *>    DEBUG_CONF   yLOG_note    ("reference already exists");               <* 
+          *>    rc = --rce;                                                           <* 
+          *>    break;                                                                <* 
+          *> }                                                                        <*/
+         DEBUG_CONF   yLOG_value   ("x_ref"     , x_ref);
+         break;
+      case  4 :  /* stacking order       */
+         if (l == 0 || strcmp (x_field, "·") == 0) {
+            DEBUG_CONF   yLOG_note    ("default value");
+            break;
+         }
+         x_stack = atoi (x_field);
+         DEBUG_CONF   yLOG_value   ("x_stack"   , x_stack);
          break;
       }
       if (rc < 0)  break;
@@ -205,6 +241,22 @@ RUN__create             (cchar a_match, cchar a_recd [LEN_RECD])
    --rce;  if (c < 2 || rc < 0) {
       DEBUG_CONF   yLOG_exit    (__FUNCTION__);
       return rce;
+   }
+   /*---(save out)--------------------*/
+   x_exist = RUN_by_ref (x_ref);
+   if (x_exist < 0) {
+      g_runs [n].eterm = x_eterm;
+      DEBUG_CONF   yLOG_value   (".eterm"    , g_runs [n].eterm);
+      strlcpy  (g_runs [n].back, x_back, LEN_TERSE);
+      DEBUG_CONF   yLOG_info    (".back"     , g_runs [n].back);
+      strlcpy  (g_runs [n].fore, x_fore, LEN_TERSE);
+      DEBUG_CONF   yLOG_info    (".fore"     , g_runs [n].fore);
+      strlcpy  (g_runs [n].hex , x_hex , LEN_LABEL);
+      DEBUG_CONF   yLOG_info    (".hex"      , g_runs [n].fore);
+      g_runs [n].ref = x_ref;
+      DEBUG_CONF   yLOG_value   (".ref"      , g_runs [n].ref);
+      g_runs [n].stack = x_stack;
+      DEBUG_CONF   yLOG_value   (".stack"    , g_runs [n].stack);
    }
    /*---(advance)---------------------*/
    if (n == g_nrun)  ++g_nrun;
@@ -398,6 +450,65 @@ RUN__classify         (cchar a_title [LEN_HUND], cchar a_pubname [LEN_LABEL], cc
 }
 
 char
+RUN__stacking         (char a_unit)
+{
+   /*> /+---(locals)-----------+-----+-----+-+/                                                                                  <* 
+    *> char        rce         =  -10;                                                                                           <* 
+    *> char        rc          =    0;                                                                                           <* 
+    *> FILE       *f           = NULL;                                                                                           <* 
+    *> char        x_recd      [LEN_RECD]  = "";                                                                                 <* 
+    *> char        t           [LEN_LABEL] = "";                                                                                 <* 
+    *> int         c           =    0;                                                                                           <* 
+    *> int         l           =    0;                                                                                           <* 
+    *> char       *p           = NULL;                                                                                           <* 
+    *> char       *q           = ", ";                                                                                           <* 
+    *> char       *r           = NULL;                                                                                           <* 
+    *> double      v           =  0.0;                                                                                           <* 
+    *> char        n           =    0;                                                                                           <* 
+    *> /+---(header)-------------------------+/                                                                                  <* 
+    *> DEBUG_FILE   yLOG_enter   (__FUNCTION__);                                                                                 <* 
+    *> /+---(generate data)------------------+/                                                                                  <* 
+    *> if (a_unit != 'y')  rc = system ("xprop -root | grep \"_NET_CLIENT_LIST_STACKING(WINDOW):\" > /tmp/yX11_stacking.txt");   <* 
+    *> /+---(open)---------------------------+/                                                                                  <* 
+    *> f = fopen ("/tmp/yX11_stacking.txt", "rt");                                                                               <* 
+    *> DEBUG_FILE   yLOG_point   ("fopen"     , f);                                                                              <* 
+    *> --rce;  if (f == NULL) {                                                                                                  <* 
+    *>    DEBUG_FILE   yLOG_exitr   (__FUNCTION__, rce);                                                                         <* 
+    *>    return rce;                                                                                                            <* 
+    *> }                                                                                                                         <* 
+    *> /+---(prepare)------------------------+/                                                                                  <* 
+    *> c = 0;                                                                                                                    <* 
+    *> fgets (x_recd, LEN_RECD, f);                                                                                              <* 
+    *> l = strlen (x_recd);                                                                                                      <* 
+    *> if (x_recd [l - 1] == '\n')  x_recd [--l] = '\0';                                                                         <* 
+    *> p = strtok_r (x_recd + 47, ", ", &r);                                                                                     <* 
+    *> /+---(read and inventory)-------------+/                                                                                  <* 
+    *> while (p != NULL) {                                                                                                       <* 
+    *>    /+---(handle)----------------------+/                                                                                  <* 
+    *>    l = strlen (p);                                                                                                        <* 
+    *>    DEBUG_FILE   yLOG_complex ("p"         , "%2d %2då%sæ", c, l, p);                                                      <* 
+    *>    strl2hex (p, &v, LEN_LABEL);                                                                                           <* 
+    *>    DEBUG_FILE   yLOG_value   ("v"         , v);                                                                           <* 
+    *>    n = RUN_by_ref (v);                                                                                                    <* 
+    *>    if (n >= 0)  g_runs [n].stack = c;                                                                                     <* 
+    *>    /+---(next)------------------------+/                                                                                  <* 
+    *>    ++c;                                                                                                                   <* 
+    *>    p = strtok_r (NULL, ", ", &r);                                                                                         <* 
+    *>    /+---(done)------------------------+/                                                                                  <* 
+    *> }                                                                                                                         <* 
+    *> /+---(close)--------------------------+/                                                                                  <* 
+    *> rc = fclose (f);                                                                                                          <* 
+    *> DEBUG_FILE   yLOG_value   ("fclose"    , rc);                                                                             <* 
+    *> --rce;  if (rc < 0) {                                                                                                     <* 
+    *>    DEBUG_FILE   yLOG_exitr   (__FUNCTION__, rce);                                                                         <* 
+    *>    return rce;                                                                                                            <* 
+    *> }                                                                                                                         <* 
+    *> /+---(complete)-----------------------+/                                                                                  <* 
+    *> DEBUG_FILE   yLOG_exit    (__FUNCTION__);                                                                                 <* 
+    *> return 0;                                                                                                                 <*/
+}
+
+char
 RUN_gather            (void)
 {
    /*---(locals)-----------+-----------+-*/
@@ -443,6 +554,8 @@ RUN_gather            (void)
       }
       rc = yX11_win_by_name (YDLST_NEXT, &x_id, &x_desk, x_title, &x_type, &x_curr, &x_left, &x_topp, &x_scrn, &x_locn, &x_wide, &x_tall, &x_size);
    }
+   /*---(stacking order)-----------------*/
+   rc = RUN__stacking ('-');
    /*---(classify)-----------------------*/
    for (i = 0; i < g_nrun; ++i) {
       g_runs [i].type = RUN__classify (g_runs [i].title, g_runs [i].pubname, g_runs [i].cmdline, g_runs [i].shortcut);
@@ -461,6 +574,8 @@ RUN_write             (cchar a_name [LEN_PATH])
    FILE       *f           = NULL;
    int         i           =    0;
    char        x_heart     [LEN_HUND]  = "";
+   char        t           [LEN_LABEL] = "";
+   char        s           [LEN_LABEL] = "";
    /*---(header)-------------------------*/
    DEBUG_FILE   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -486,10 +601,18 @@ RUN_write             (cchar a_name [LEN_PATH])
    fprintf (f, "\n");
    /*---(read terminal)------------------*/
    for (i = 0; i < g_nrun; ++i) {
-      if (i % 5 == 0)  fprintf (f, "#-epid  -back-  fg  --ref---  d  ---title--------------------------------------------------------------------------------------------  t  ---shortcut---------  left  topp  s  l  wide  tall  z \n");
-      fprintf (f, "%-6d  %-6.6s  %-2.2s  %-8ld  %1d  %-100.100s  %c  %-20.20s  %4d  %4d  %c  %c  %4d  %4d  %c  %6d  %-10.10s  %s \n",
-            g_runs [i].eterm, g_runs [i].back , g_runs [i].fore ,
-            g_runs [i].ref  , g_runs [i].desk , g_runs [i].title, g_runs [i].type , g_runs [i].shortcut ,
+      if (i % 5 == 0)  fprintf (f, "#-epid  -back-  fg  ---ref---  st  d  ---title--------------------------------------------------------------------------------------------  t  ---shortcut---------  left  topp  s  l  wide  tall  z \n");
+      if (g_runs [i].ref == 0)  strcpy (t, "·");
+      else {
+         strl4hex (g_runs [i].ref, t, 4, 'x', LEN_LABEL);
+         strldchg (t, '0', '·', LEN_LABEL);
+         if (t [3] == '·')  t [3] = '0';
+      }
+      if (g_runs [i].stack == -1)  strcpy (s, " ·");
+      else                         sprintf (s, "%2d", g_runs [i].stack);
+      fprintf (f, "%-6d  %-6.6s  %-2.2s  %-9.9s  %-2.2s  %1d  %-100.100s  %c  %-20.20s  %4d  %4d  %c  %c  %4d  %4d  %c  %6d  %-10.10s  %s \n",
+            g_runs [i].eterm, g_runs [i].back , g_runs [i].fore , t,
+            s               , g_runs [i].desk , g_runs [i].title, g_runs [i].type , g_runs [i].shortcut ,
             g_runs [i].left , g_runs [i].topp , g_runs [i].scrn , g_runs [i].locn ,
             g_runs [i].wide , g_runs [i].tall , g_runs [i].size ,
             g_runs [i].use  , g_runs [i].pubname, g_runs [i].cmdline);
@@ -529,9 +652,9 @@ RUN__unit               (char *a_question, int n)
       snprintf (unit_answer, LEN_HUND, "RUN count        : %d", g_nrun);
    }
    else if (strcmp (a_question, "entry"   )        == 0) {
-      if (g_runs [n].ref > 0)  sprintf (t, "%ld", g_runs [n].ref);
-      else                     strcpy  (t, "·");
-      snprintf (unit_answer, LEN_HUND, "RUN entry   (%2d) : %-6d  %-6.6s  %-2.2s  %-8.8s  %s", n, g_runs [n].eterm, g_runs [n].back, g_runs [n].fore, t, g_runs [n].shortcut);
+      if (g_runs [n].stack >= 0)  sprintf (t, "%2d", g_runs [n].stack);
+      else                        strcpy  (t, " ·");
+      snprintf (unit_answer, LEN_HUND, "RUN entry   (%2d) : %-6d  %-6.6s  %-2.2s  %-9.9s  %-2.2s  %-12.12s  %ld", n, g_runs [n].eterm, g_runs [n].back, g_runs [n].fore, g_runs [n].hex, t, g_runs [n].shortcut, g_runs [n].ref);
    }
    /*---(complete)-----------------------*/
    return unit_answer;

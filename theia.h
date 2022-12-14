@@ -5,8 +5,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_FOCUS     "WM (window_manager)"
 #define     P_NICHE     "tc (terminal_configuration)"
-#define     P_SUBJECT   "terminal color configuration"
-#define     P_PURPOSE   "interactive configuration for terminal windows"
+#define     P_SUBJECT   "eterm configuration and tracking"
+#define     P_PURPOSE   "configuration and tracking for terminal windows"
 /*········· ··········· ´·····························´········································*/
 #define     P_NAMESAKE  "theia-euryphaessa (wide-shinning)"
 #define     P_PRONOUCE  "thee·uh yur·ee·fray·shee·uh"
@@ -33,8 +33,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "1.--, running every day in production"
 #define     P_VERMINOR  "1.0-, changed from hack to maintainable program."
-#define     P_VERNUM    "1.0b"
-#define     P_VERTXT    "added a ton of stuff, should not have waied this long"
+#define     P_VERNUM    "1.0c"
+#define     P_VERTXT    "pager and dynamic-scaling of drawings look good"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -125,6 +125,8 @@
 #include    <stdio.h>        /* C_ANSI : strcpy, strlen, strchr, strcmp, ...  */
 #include    <string.h>       /* C_ANSI : printf, snprintf, fgets, fopen, ...  */
 #include    <stdlib.h>       /* C_ANSI : exit                                 */
+#include    <fcntl.h>        /* clibc  standard file control             */
+#include    <math.h>         /*                                          */
 
 /*===[[ DE-FACTO STANDARD LIBRARIES ]]========================================*/
 #include    <ncurses.h>      /* CURSES : mvprintw, refresh, getch, ...        */
@@ -188,7 +190,9 @@ struct cRUN {
    char        back        [LEN_TERSE];     /* background terse name          */
    char        fore        [LEN_TERSE];     /* foreground refno               */
    /*---(window)------------*/
+   char        hex         [LEN_LABEL];
    long        ref;                         /* window reference number        */
+   char        stack;                       /* window stacking order          */
    char        desk;                        /* which desktop                  */
    char        title       [LEN_HUND];      /* current window title           */
    char        type;                        /* window use based on title      */
@@ -205,12 +209,14 @@ struct cRUN {
    short       use;
    char        pubname     [LEN_LABEL];
    char        cmdline     [LEN_RECD];
+   char        order;
    /*---(done)--------------*/
 };
 extern tRUN   g_runs    [MAX_RUN];
 extern int    g_nrun;
 extern int    g_crun;
 
+#define     FILE_FIFO      "/dev/theia.fifo"
 
 typedef    struct cACCESSOR  tACCESSOR;
 struct cACCESSOR {
@@ -222,6 +228,12 @@ struct cACCESSOR {
    char      report;
    char      here;
    char      shortcut      [LEN_LABEL];
+   float     scale;
+   char      ygrid;
+   char      xgrid;
+   char      range;
+   char      list;
+   char      extra;
    /*---(files)----------------*/
    int       custom;
    int       theme;
@@ -304,6 +316,29 @@ char*       RUN__unit               (char *a_question, int n);
 /*---(done)-----------------*/
 
 
+
+/*===[[ theia_fifo.c ]]=======================================================*/
+/*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
+/*---(search)---------------*/
+char        FIFO_by_stack           (char a_stack);
+/*---(reorder)--------------*/
+char        FIFO__current           (cchar a_hex [LEN_LABEL]);
+/*---(listen)---------------*/
+char        FIFO__listener          (cchar a_recd [LEN_RECD]);
+char        FIFO_listen             (cchar a_name [LEN_PATH]);
+char        FIFO_eater              (cchar a_name [LEN_PATH]);
+/*---(done)-----------------*/
+
+
+
+char        PAGE__init              (void);
+char        PAGE__scaler            (float a_scale);
+char        PAGE__single            (char a_type, short a_wide, char a_prefix [LEN_TERSE], char a_single [LEN_FULL], char a_break [LEN_TERSE]);
+char        PAGE__line              (char x_grid, cchar a_prefix [LEN_TERSE], cchar a_single [LEN_FULL], cchar a_break [LEN_TERSE], char r_desk [LEN_FULL]);
+char        PAGE__block             (short x_offset, char x_grid, short a_wide, short a_tall);
+char        PAGE_single             (void);
+char        PAGE_multi              (void);
+char*       PAGE__unit              (char *a_question, int n);
 
 #endif
 /*===============================[[ end code ]]===============================*/

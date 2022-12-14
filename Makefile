@@ -2,7 +2,7 @@
 # basename of executable, header, and all code files
 NAME_BASE  = theia
 # additional standard and outside libraries
-LIB_STD    = -lncurses -ltinfo
+LIB_STD    = -lncurses -ltinfo -lm
 # all heatherly libraries used, debug versions whenever available
 LIB_MINE   = -lySTR_debug -lyEXEC_debug -lyX11_debug
 # directory for production code, no trailing slash

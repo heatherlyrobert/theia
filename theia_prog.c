@@ -97,21 +97,30 @@ char         /*--> initialize variables ------------------[ ------ [ ------ ]-*/
 PROG__init              (int a_argc, char *a_argv [])
 {
    /*---(locals)-------------------------*/
-   int         i           = 0;             /* iterator -- structure entry    */
-   int         j           = 0;             /* iterator -- color entry        */
+   char        rce         =  -10;
+   int         i           =    0;
+   int         j           =    0;
+   int         x_running   =    0;
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter    (__FUNCTION__);
-   /*---(runtime)------------------------*/
-   /*> g_nrun = 0;                                                                    <* 
-    *> for (i = 0; i < MAX_RUN; ++i) {                                                <* 
-    *>    g_runs [i].ppid       = -1;                                                 <* 
-    *>    g_runs [i].when       = -1;                                                 <* 
-    *>    g_runs [i].back_key   = '-';                                                <* 
-    *>    g_runs [i].back_hex   = 0;                                                  <* 
-    *>    strcpy (g_runs [i].theme_ref , "00");                                       <* 
-    *>    strcpy (g_runs [i].theme_name, "unknown");                                  <* 
-    *> }                                                                              <*/
-   /*---(runtime)------------------------*/
+   /*---(check for normal version)-------*/
+   x_running = yEXEC_find ("theia", NULL);
+   DEBUG_PROG   yLOG_value   ("x_running" , x_running);
+   --rce;  if (x_running > 1) {
+      printf ("already running in normal mode\n");
+      DEBUG_PROG   yLOG_note    ("already running in normal mode");
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(check for debug version)--------*/
+   x_running = yEXEC_find ("theia_debug", NULL);
+   DEBUG_PROG   yLOG_value   ("x_running" , x_running);
+   --rce;  if (x_running > 1) {
+      printf ("already running in debug mode\n");
+      DEBUG_PROG   yLOG_note    ("already running in debug mode");
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(initialize)---------------------*/
    FORE_purge ();
    BACK_purge ();
@@ -124,6 +133,13 @@ PROG__init              (int a_argc, char *a_argv [])
    my.custom = -1;
    g_nback   = 0;
    g_cback   = 0;
+   my.desk   = -1;
+   my.scale  = 0.333;
+   my.ygrid  = 1;
+   my.xgrid  = 1;
+   my.range  = 1;
+   my.list   = '-';
+   my.extra  = '-';
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit     (__FUNCTION__);
    return 0;
@@ -155,25 +171,47 @@ PROG__args              (int a_argc, char *a_argv [])
       ++x_args;
       /*---(reporting)-------------------*/
       if      (strcmp (a, "-w"        ) == 0)    my.report = 'w';
-      else if (strcmp (a, "--wide"    ) == 0)    my.report = 'w';
-      else if (strcmp (a, "-e"        ) == 0)    my.report = 'e';
-      else if (strcmp (a, "--every"   ) == 0)    my.report = 'e';
-      else if (strcmp (a, "-n"        ) == 0)    my.report = 'n';
-      else if (strcmp (a, "--narrow"  ) == 0)    my.report = 'n';
-      else if (strcmp (a, "-t"        ) == 0)    my.report = 't';
-      else if (strcmp (a, "--tiny"    ) == 0)    my.report = 't';
-      else if (strcmp (a, "-b"        ) == 0)    my.report = 'b';
-      else if (strcmp (a, "--backs"   ) == 0)    my.report = 'b';
-      else if (strcmp (a, "-r"        ) == 0)    my.report = 'r';
-      else if (strcmp (a, "--runtime" ) == 0)    my.report = 'r';
-      else if (strcmp (a, "-f"        ) == 0)    my.report = 'f';
-      else if (strcmp (a, "--fullsome") == 0)    my.report = 'f';
-      else if (strcmp (a, "-q"        ) == 0)    my.report = '!';
+      /*> else if (strcmp (a, "--wide"    ) == 0)    my.report = 'w';                 <* 
+       *> else if (strcmp (a, "-e"        ) == 0)    my.report = 'e';                 <* 
+       *> else if (strcmp (a, "--every"   ) == 0)    my.report = 'e';                 <* 
+       *> else if (strcmp (a, "-n"        ) == 0)    my.report = 'n';                 <* 
+       *> else if (strcmp (a, "--narrow"  ) == 0)    my.report = 'n';                 <* 
+       *> else if (strcmp (a, "-t"        ) == 0)    my.report = 't';                 <* 
+       *> else if (strcmp (a, "--tiny"    ) == 0)    my.report = 't';                 <* 
+       *> else if (strcmp (a, "-b"        ) == 0)    my.report = 'b';                 <* 
+       *> else if (strcmp (a, "--backs"   ) == 0)    my.report = 'b';                 <* 
+       *> else if (strcmp (a, "-r"        ) == 0)    my.report = 'r';                 <* 
+       *> else if (strcmp (a, "--runtime" ) == 0)    my.report = 'r';                 <* 
+       *> else if (strcmp (a, "-f"        ) == 0)    my.report = 'f';                 <* 
+       *> else if (strcmp (a, "--fullsome") == 0)    my.report = 'f';                 <* 
+       *> else if (strcmp (a, "-q"        ) == 0)    my.report = '!';                 <*/
       else if (strcmp (a, "--quarter" ) == 0)    my.report = '!';
       else if (strcmp (a, "--spin"    ) == 0)    my.back_req = '*';
       else if (strcmp (a, "--export"  ) == 0)    my.report = 'x';
       else if (strcmp (a, "--identify") == 0)    my.here   = 'y';
       else if (strcmp (a, "--update"  ) == 0)    my.here   = 'y';
+      else if (strcmp (a, "--pager"   ) == 0)    my.report = 'p';
+      else if (strcmp (a, "--1st"     ) == 0)  { my.report = 'p'; my.desk   =  0; }
+      else if (strcmp (a, "--2nd"     ) == 0)  { my.report = 'p'; my.desk   =  1; }
+      else if (strcmp (a, "--3rd"     ) == 0)  { my.report = 'p'; my.desk   =  2; }
+      else if (strcmp (a, "--4th"     ) == 0)  { my.report = 'p'; my.desk   =  3; }
+      else if (strcmp (a, "--5th"     ) == 0)  { my.report = 'p'; my.desk   =  4; }
+      else if (strcmp (a, "--6th"     ) == 0)  { my.report = 'p'; my.desk   =  5; }
+      else if (strcmp (a, "--7th"     ) == 0)  { my.report = 'p'; my.desk   =  6; }
+      else if (strcmp (a, "--8th"     ) == 0)  { my.report = 'p'; my.desk   =  7; }
+      else if (strcmp (a, "--big"     ) == 0)    my.scale  = 0.500;
+      else if (strcmp (a, "--large"   ) == 0)    my.scale  = 0.400;
+      else if (strcmp (a, "--medium"  ) == 0)    my.scale  = 0.333;
+      else if (strcmp (a, "--small"   ) == 0)    my.scale  = 0.250;
+      else if (strcmp (a, "--tiny"    ) == 0)    my.scale  = 0.200;
+      else if (strcmp (a, "--micro"   ) == 0)    my.scale  = 0.100;
+      else if (strcmp (a, "--mini"    ) == 0)    my.scale  = 0.150;
+      else if (strcmp (a, "--one"     ) == 0)  { my.range = 1; my.ygrid = 1; my.xgrid = 1; }
+      else if (strcmp (a, "--two"     ) == 0)  { my.range = 2; my.ygrid = 1; my.xgrid = 2; }
+      else if (strcmp (a, "--three"   ) == 0)  { my.range = 3; my.ygrid = 1; my.xgrid = 3; }
+      else if (strcmp (a, "--all"     ) == 0)  { my.range = 8; my.ygrid = 2; my.xgrid = 4; }
+      else if (strcmp (a, "--list"    ) == 0)    my.list  = 'y';
+      else if (strcmp (a, "--extra"   ) == 0)    my.extra = 'y';
       /*---(background)------------------*/
       else if (len == 1 && a [0] >= 'a' && a [0] <= 'z') my.back_req = a [0];
       else if (len == 1 && a [0] >= 'A' && a [0] <= 'Z') my.back_req = a [0];
@@ -285,7 +323,7 @@ PROG_dawn               (void)
    n = rc;
    my.back_act = g_runs [n].back [0];
    strlcpy (my.fore_act, g_runs [n].fore, LEN_TERSE);
-   my.desk = yX11_desk_current (NULL);
+   if (my.desk < 0)  my.desk = yX11_desk_current (NULL);
    /*> printf ("my.desk  = %d\n", my.desk);                                           <*/
    my.win  = yX11_win_current (x_name, &x_desk);
    /*> printf ("my.win   = %ld (%1d) %s\n", my.win, x_desk, x_name);                  <*/
