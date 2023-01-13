@@ -179,6 +179,7 @@ FORE_set           (cchar a_ref [LEN_TERSE])
    for (i = 0; i < 16; ++i) {
       x = ((int) i / 2) - 0 + ((i % 2) *  8);
       printf ("\e]P%1x%06x", x, g_fores [n].value [i]);
+      /*> printf ("%2d color %d to å%06xæ\n", i, x, g_fores [n].value [i]);           <*/
    }
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
@@ -191,8 +192,6 @@ FORE_set           (cchar a_ref [LEN_TERSE])
 /*===----                      unit test accessor                      ----===*/
 /*====================------------------------------------====================*/
 static void      o___UNITTEST________________o (void) {;}
-
-char        unit_answer [LEN_RECD];
 
 char*            /*--> unit test accessor ------------------------------*/
 FORE__unit              (char *a_question, int n)

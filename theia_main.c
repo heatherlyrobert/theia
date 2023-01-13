@@ -37,10 +37,12 @@ main               (int a_argc, char *a_argv [])
    rc = FIFO_eater ("/tmp/xprop.txt");
    DEBUG_PROG   yLOG_value    ("listen"    , rc);
    /*---(run)----------------------------*/
-   if (my.back_req != '·') {
-      BACK_set (my.back_req);
+   if (my.eterm > 0)  {
+      if (strcmp (my.back_req, "·") != 0) {
+         BACK_set (my.back_req);
+      }
    }
-   if (strcmp (my.fore_req, "·") != NULL) {
+   if (strcmp (my.fore_req, "·") != 0) {
       FORE_set (my.fore_req);
    }
    switch (my.report) {
@@ -123,8 +125,8 @@ main_OLD           (int a_argc, char *a_argv [])
    /*> if (strchr ("*-", my.back) == NULL)  BACK_find    (my.back);               <*/
    /*---(set environment)----------------*/
    if (my.report == 'x' && g_cback   >  0)  {
-      printf ("export theia_tint=\"%c § %-6.6s § %-12.12s § %-7.7s § %9d §\";\n",
-            g_backs [g_cback].abbr, g_backs [g_cback].terse, g_backs [g_cback].name,
+      printf ("export theia_tint=\"%2.2s § %-6.6s § %-12.12s § %-7.7s § %9d §\";\n",
+            g_backs [g_cback].refno, g_backs [g_cback].terse, g_backs [g_cback].name,
             g_backs [g_cback].hex, g_backs [g_cback].value);
       /*> printf ("export theia_1_abbr=%c;\n" , g_backs [g_cback].key);                  <* 
        *> printf ("export theia_2_color=%s\n", g_backs [g_cback].color);                 <* 
@@ -139,15 +141,15 @@ main_OLD           (int a_argc, char *a_argv [])
    }
    if (my.report == 'x')  return 0;
    /*---(set back)-----------------------*/
-   if (my.back_req == '*') {
-      for (i = 1; i < g_nback; ++i) {
-         /*> BACK_find    (g_backs [i]);                                              <*/
-         /*> BACK_set      ();                                                        <*/
-         printf ("%c  %s\n", g_backs [i].abbr, g_backs [i].name);
-         usleep (750000);
-      }
-      return 0;
-   }
+   /*> if (my.back_req == '*') {                                                                <* 
+    *>    for (i = 1; i < g_nback; ++i) {                                                       <* 
+    *>       /+> BACK_find    (g_backs [i]);                                              <+/   <* 
+    *>       /+> BACK_set      ();                                                        <+/   <* 
+    *>       printf ("%c  %s\n", g_backs [i].abbr, g_backs [i].name);                           <* 
+    *>       usleep (750000);                                                                   <* 
+    *>    }                                                                                     <* 
+    *>    return 0;                                                                             <* 
+    *> }                                                                                        <*/
    if (g_cback   >  0)  {
       /*> BACK_set      ();                                                           <*/
       RUNTIME_write ();

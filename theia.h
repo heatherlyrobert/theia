@@ -26,15 +26,20 @@
 #define     P_LANGUAGE  "ansi-c      (wicked, limitless, universal, and everlasting)"
 #define     P_COMPILER  "gcc 5.3.0"
 #define     P_CODESIZE  "large       (appoximately 10,000 slocl)"
-#define     P_DEPENDS   "ySTR,yEXEC"
+/*········· ··········· ´·····························´········································*/
+#define     P_DEPSTDC   "stdio,stdlib,string,math,fnctl"
+#define     P_DEPGRAPH  "ncurses"
+#define     P_DEPCORE   "yLOG,yURG,ySTR"
+#define     P_DEPVIKEYS "···"
+#define     P_DEPOTHER  "yEXEC,yX11"
 /*········· ··········· ´·····························´········································*/
 #define     P_AUTHOR    "heatherlyrobert"
 #define     P_CREATED   "2014-01"
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "1.--, running every day in production"
 #define     P_VERMINOR  "1.0-, changed from hack to maintainable program."
-#define     P_VERNUM    "1.0c"
-#define     P_VERTXT    "pager and dynamic-scaling of drawings look good"
+#define     P_VERNUM    "1.0d"
+#define     P_VERTXT    "adapted to use (mostly) with console also"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -167,7 +172,7 @@ extern int    g_cfore;
 #define     MAX_BACK         200
 typedef     struct cBACK     tBACK;
 struct cBACK {
-   char        abbr;
+   char        refno       [LEN_TERSE];
    char        terse       [LEN_TERSE];
    char        name        [LEN_LABEL];
    char        hex         [LEN_TERSE];
@@ -221,8 +226,9 @@ extern int    g_crun;
 typedef    struct cACCESSOR  tACCESSOR;
 struct cACCESSOR {
    /*---(arguments)------------*/
-   char      back_act;
-   char      back_req;
+   char      identify;
+   char      back_act   [LEN_TERSE];
+   char      back_req   [LEN_TERSE];
    char      fore_act   [LEN_TERSE];
    char      fore_req   [LEN_TERSE];
    char      report;
@@ -242,7 +248,7 @@ struct cACCESSOR {
    long      win;
    /*---(files)----------------*/
 };
-tACCESSOR my;
+extern tACCESSOR my;
 
 extern      char        unit_answer [LEN_RECD];
 
@@ -281,9 +287,9 @@ char        CONF_read               (void);
 
 /*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
 char        BACK_purge              (void);
-char        BACK_by_abbr            (cchar a_abbr);
+char        BACK_by_ref             (cchar a_ref  [LEN_TERSE]);
 char        BACK_create             (cchar a_recd [LEN_RECD]);
-char        BACK_set                (cchar a_abbr);
+char        BACK_set                (cchar a_ref [LEN_TERSE]);
 char*       BACK__unit              (char *a_question, int n);
 
 

@@ -16,7 +16,7 @@ BACK_purge              (void)
    DEBUG_CONF   yLOG_senter  (__FUNCTION__);
    /*---(clear table)--------------------*/
    for (i = 0; i < MAX_BACK; ++i)  {
-      g_backs [i].abbr      = '·';
+      strlcpy (g_backs [i].refno, "·", LEN_TERSE);
       strlcpy (g_backs [i].terse, "·", LEN_TERSE);
       strlcpy (g_backs [i].name , "·", LEN_LABEL);
       strlcpy (g_backs [i].hex  , "·", LEN_TERSE);
@@ -29,16 +29,16 @@ BACK_purge              (void)
 }
 
 char
-BACK_by_abbr            (cchar a_abbr)
+BACK_by_ref        (cchar a_ref [LEN_TERSE])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    int         i           =    0;
-   /*---(find back)----------------------*/
-   --rce;  if (a_abbr == 0)  return rce;
+   /*---(find fore)----------------------*/
+   --rce;  if (a_ref  == NULL)  return rce;
    g_cback   = 0;
    for (i = 0; i < g_nback; ++i) {
-      if (g_backs  [i].abbr != a_abbr)  continue;
+      if (strcmp (g_backs  [i].refno, a_ref) != 0)  continue;
       g_cback  = i;
       return i;
    }
@@ -86,13 +86,13 @@ BACK_create             (cchar a_recd [LEN_RECD])
       switch (c) {
       case  1 :  /* color abbr           */
          if (l < 1)  { rc = -c; break; }
-         n = BACK_by_abbr (t [0]);
+         n = BACK_by_ref (t);
          if (n >= 0) {
             DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
             return rce;
          }
-         g_backs [g_nback].abbr  = t [0];
-         DEBUG_CONF   yLOG_char    ("abbr"      , g_backs [g_nback].abbr);
+         strlcpy  (g_backs [g_nback].refno, t, LEN_TERSE);
+         DEBUG_CONF   yLOG_info    ("refno"     , g_backs [g_nback].refno);
          break;
       case  2 :  /* color terse          */
          if (l < 5)  { rc = -c; break; }
@@ -104,7 +104,9 @@ BACK_create             (cchar a_recd [LEN_RECD])
          strlcpy  (g_backs [g_nback].name , t, LEN_LABEL);
          DEBUG_CONF   yLOG_info    ("name"      , g_backs [g_nback].name);
          break;
-      case  4 :  /* hex color value      */
+      case  4 :  /* old color */
+         break;
+      case  5 :  /* hex color value      */
          if (l != 7)  { rc = -c; break; }
          strlcpy  (g_backs [g_nback].hex  , t, LEN_TERSE);
          DEBUG_CONF   yLOG_info    ("hex"       , g_backs [g_nback].hex);
@@ -121,7 +123,7 @@ BACK_create             (cchar a_recd [LEN_RECD])
    /*---(trouble)---------------------*/
    DEBUG_CONF   yLOG_value   ("c"         , c);
    DEBUG_CONF   yLOG_value   ("rc"        , rc);
-   --rce;  if (c < 4 || rc < 0) {
+   --rce;  if (c < 5 || rc < 0) {
       DEBUG_CONF   yLOG_exit    (__FUNCTION__);
       return rce;
    }
@@ -133,7 +135,7 @@ BACK_create             (cchar a_recd [LEN_RECD])
 }
 
 char
-BACK_set           (cchar a_abbr)
+BACK_set           (cchar a_ref [LEN_TERSE])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -142,14 +144,14 @@ BACK_set           (cchar a_abbr)
    /*---(header)-------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(find background)----------------*/
-   n = BACK_by_abbr (a_abbr);
-   DEBUG_PROG   yLOG_value   ("by_abbr"   , n);
+   n = BACK_by_ref (a_ref);
+   DEBUG_PROG   yLOG_value   ("by_ref"    , n);
    --rce;  if (n < 0) {
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(set actual)---------------------*/
-   my.back_act = a_abbr;
+   strlcpy (my.back_act, a_ref, LEN_TERSE);
    /*---(set background)-----------------*/
    /*> DEBUG_GRAF  yLOG_complex ("back"      , "%2d, %c, %s, %s, %s", g_cback, g_backs [g_cback].abbr, g_backs [g_cback].terse, g_backs [g_cback].name, g_backs [g_cback].hex);   <*/
    /*> DEBUG_GRAF  yLOG_complex ("color"     , "%10d, %s", g_backs [g_cback].value, x_str);   <*/
@@ -174,8 +176,8 @@ BACK_report        (void)
    printf ("\n## terse-   ---name-------------  --hex--  ---val---\n");
    /*---(inventory)----------------------*/
    for (i = 0; i < g_nback; ++i) {
-      printf ("%c  %-6.6s   %-20.20s  %-7.7s  %9d\n",
-            g_backs [i].abbr  , g_backs [i].terse,
+      printf ("%-2.2s  %-6.6s   %-20.20s  %-7.7s  %9d\n",
+            g_backs [i].refno , g_backs [i].terse,
             g_backs [i].name  , g_backs [i].hex, g_backs [i].value);
    }
    /*---(footer)-------------------------*/
@@ -205,7 +207,7 @@ BACK__unit              (char *a_question, int n)
       snprintf (unit_answer, LEN_HUND, "BACK count       : %d", g_nback);
    }
    else if (strcmp (a_question, "entry"   )        == 0) {
-      snprintf (unit_answer, LEN_HUND, "BACK entry  (%2d) : %c  %-6.6s  %-15.15s  %-7.7s  %d", n, g_backs [n].abbr, g_backs [n].terse, g_backs [n].name, g_backs [n].hex, g_backs [n].value);
+      snprintf (unit_answer, LEN_HUND, "BACK entry  (%2d) : %-2.2s  %-6.6s  %-15.15s  %-7.7s  %d", n, g_backs [n].refno, g_backs [n].terse, g_backs [n].name, g_backs [n].hex, g_backs [n].value);
    }
    /*---(complete)-----------------------*/
    return unit_answer;

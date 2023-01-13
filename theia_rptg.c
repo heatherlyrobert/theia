@@ -93,8 +93,13 @@ RPTG__layout       (char n, char a_fg, char a_type)
    printf (" ");
    RPTG__single (n, a_fg +  8, -1      , a_type);
    if (s == 'c') {
-      RPTG__single (n, a_fg + 24, -1      , a_type);
-      RPTG__single (n, a_fg + 16, -1      , a_type);
+      if (my.eterm > 0) {
+         RPTG__single (n, a_fg + 24, -1       , a_type);
+         RPTG__single (n, a_fg + 16, -1       , a_type);
+      } else {
+         RPTG__single (n, 0        , a_fg + 8 , a_type);
+         RPTG__single (n, 0        , a_fg     , a_type);
+      }
    }
    printf (" ");
    RPTG__single (n, a_fg    , a_fg + 8, a_type);
@@ -181,7 +186,7 @@ REPORT_quarter     (char *a_refno)
    n = FORE_by_ref (a_refno);
    if (n < 0)  return 0;
    printf ("theia-euryphaessa (wide-shinning) terminal configuration for ansi 16-color terms\n");
-   printf ("assortment of consistently nice contrasts           scheme [%s/%c] %s¦", g_fores  [n].refno, g_fores [n].style, g_fores [n].name);
+   printf ("assortment of consistently nice contrasts           scheme [%s/%c] %s\n", g_fores  [n].refno, g_fores [n].style, g_fores [n].name);
    printf ("\n");
    for (i = 0;  i < 8; ++i) {
       switch (g_fores [n].style) {

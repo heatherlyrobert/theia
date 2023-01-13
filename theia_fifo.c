@@ -103,7 +103,7 @@ FIFO__listener          (cchar a_recd [LEN_RECD])
 char
 FIFO_listen             (cchar a_name [LEN_PATH])
 {
-   return yEXEC_fifo_listen ('y', a_name, FIFO__listener);         
+   /*> return yEXEC_fifo_listen ('y', a_name, FIFO__listener);                        <*/
 }
 
 

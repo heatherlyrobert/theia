@@ -1,5 +1,6 @@
 #include   "theia.h"
 
+tACCESSOR my;
 
 
 /*====================------------------------------------====================*/
@@ -125,21 +126,23 @@ PROG__init              (int a_argc, char *a_argv [])
    FORE_purge ();
    BACK_purge ();
    RUN_purge  ();
-   my.theme  = 0;
-   my.report = '·';
-   my.here   = '·';
-   my.back_req = '·';
+   my.identify = '·';
+   my.theme    = 0;
+   my.report   = '·';
+   my.here     = '·';
+   strlcpy (my.back_req, "·", LEN_TERSE);
    strlcpy (my.fore_req, "·", LEN_TERSE);
-   my.custom = -1;
-   g_nback   = 0;
-   g_cback   = 0;
-   my.desk   = -1;
-   my.scale  = 0.333;
-   my.ygrid  = 1;
-   my.xgrid  = 1;
-   my.range  = 1;
-   my.list   = '-';
-   my.extra  = '-';
+   my.custom   = -1;
+   g_nback     = 0;
+   g_cback     = 0;
+   my.desk     = -1;
+   my.scale    = 0.333;
+   my.ygrid    = 1;
+   my.xgrid    = 1;
+   my.range    = 1;
+   my.list     = '-';
+   my.extra    = '-';
+   my.eterm    = -1;
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit     (__FUNCTION__);
    return 0;
@@ -170,7 +173,8 @@ PROG__args              (int a_argc, char *a_argv [])
       DEBUG_ARGS   yLOG_info  ("argument"  , a);
       ++x_args;
       /*---(reporting)-------------------*/
-      if      (strcmp (a, "-w"        ) == 0)    my.report = 'w';
+      if      (strcmp (a, "--identify") == 0)    my.identify = 'y';
+      /*> else if (strcmp (a, "-w"        ) == 0)    my.report   = 'w';               <*/
       /*> else if (strcmp (a, "--wide"    ) == 0)    my.report = 'w';                 <* 
        *> else if (strcmp (a, "-e"        ) == 0)    my.report = 'e';                 <* 
        *> else if (strcmp (a, "--every"   ) == 0)    my.report = 'e';                 <* 
@@ -184,12 +188,11 @@ PROG__args              (int a_argc, char *a_argv [])
        *> else if (strcmp (a, "--runtime" ) == 0)    my.report = 'r';                 <* 
        *> else if (strcmp (a, "-f"        ) == 0)    my.report = 'f';                 <* 
        *> else if (strcmp (a, "--fullsome") == 0)    my.report = 'f';                 <* 
-       *> else if (strcmp (a, "-q"        ) == 0)    my.report = '!';                 <*/
+       else if (strcmp (a, "-q"        ) == 0)    my.report = '!';                 <*/
       else if (strcmp (a, "--quarter" ) == 0)    my.report = '!';
-      else if (strcmp (a, "--spin"    ) == 0)    my.back_req = '*';
+      /*> else if (strcmp (a, "--spin"    ) == 0)    my.back_req = '*';               <*/
       else if (strcmp (a, "--export"  ) == 0)    my.report = 'x';
-      else if (strcmp (a, "--identify") == 0)    my.here   = 'y';
-      else if (strcmp (a, "--update"  ) == 0)    my.here   = 'y';
+      else if (strcmp (a, "--update"  ) == 0)    my.here   = 'u';
       else if (strcmp (a, "--pager"   ) == 0)    my.report = 'p';
       else if (strcmp (a, "--1st"     ) == 0)  { my.report = 'p'; my.desk   =  0; }
       else if (strcmp (a, "--2nd"     ) == 0)  { my.report = 'p'; my.desk   =  1; }
@@ -213,8 +216,10 @@ PROG__args              (int a_argc, char *a_argv [])
       else if (strcmp (a, "--list"    ) == 0)    my.list  = 'y';
       else if (strcmp (a, "--extra"   ) == 0)    my.extra = 'y';
       /*---(background)------------------*/
-      else if (len == 1 && a [0] >= 'a' && a [0] <= 'z') my.back_req = a [0];
-      else if (len == 1 && a [0] >= 'A' && a [0] <= 'Z') my.back_req = a [0];
+      else if (len == 1 && a [0] >= 'a' && a [0] <= 'z') strcpy (my.back_req, a);
+      else if (len == 2 && strchr ("abcdefghijklmnopqrstuvwxyz", a [0]) != 0 &&
+            strchr ("[-+]", a [1]) != NULL)
+         strlcpy (my.back_req, a, LEN_TERSE);
       /*---(foreground)------------------*/
       else if (len == 2 && strchr ("0123456789abcdef", a [0]) != 0 &&
             strchr ("0123456789abcdef", a [1]) != 0)
@@ -239,9 +244,46 @@ PROG__begin             (void)
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char        rc          =    0;
+   char       *x_file      = "/tmp/theia.txt";
+   char        x_recd      [LEN_RECD]  = "";
+   char        x_ref       [LEN_LABEL] = "";
+   char        t           [LEN_LABEL] = "";
+   short       c           =    0;
+   char        x_back      =  '-';
+   char       *p           = NULL;
+   FILE       *f           = NULL;
+   int         l           =    0;
    /*---(begin)--------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
-   /*---(configure)----------------------*/
+   /*---(new terminal action)------------*/
+   if (my.identify != '·') {
+      system ("wmctrl -l -G | grep \"Eterm 0.9.7\" | grep \"0    0    .... 110 \" > /tmp/theia.txt");
+      c = yURG_peek_count (x_file);
+      if (c > 0)  f = fopen (x_file, "rt");
+      if (f != NULL) {
+         printf ("theia --identify\n");
+         printf ("   found %d lines\n", c);;
+         fgets (x_recd, LEN_RECD, f);
+         rc = fclose (f);
+         l = strlen (x_recd);
+         if (l > 1 && x_recd [l - 1] == '\n')  x_recd [--l] = '\0';
+         printf ("   returned å%sæ\n", x_recd);
+         if (l > 0) {
+            sprintf (x_ref, "%-10.10s", x_recd);
+            printf ("   window   å%sæ\n", x_ref);
+            sprintf (t, "%-4.4s", x_recd + 24);
+            printf ("   width    å%sæ\n", t);
+            c  = atoi (t);
+            if (c >= 592 && c <= 742) {
+               sprintf (my.back_req, "%c", (c - 592) / 6 + 'a');
+               printf ("   back      %s\n", my.back_req);
+            }
+            sprintf (x_recd, "wmctrl -i -r %s -e 0,150,100,529,383 2>&1 > /dev/null", x_ref);
+            system (x_recd);
+         }
+      }
+      strlcpy (my.fore_req, "95", LEN_TERSE);
+   }
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -305,35 +347,44 @@ PROG_dawn               (void)
    /*---(configure)----------------------*/
    rc = CONF_read ();
    DEBUG_PROG   yLOG_value    ("conf"      , rc);
-   rc = RUN_read  (FILE_RUNTIME);
-   DEBUG_PROG   yLOG_value    ("run"       , rc);
-   rc = yEXEC_find_my_eterm (getpid (), &(my.eterm));
-   DEBUG_PROG   yLOG_value    ("my_eterm"  , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);
-      return rce;
+   /*---(check terminal type)------------*/
+   strlcpy (t, getenv ("TERM"), LEN_LABEL);
+   if (strcmp (t, "linux") == 0) {
+      printf ("linux terminal\n");
+      my.eterm = -1;
+      strlcpy (my.fore_req, "99", LEN_TERSE);
+      strlcpy (my.fore_act, "95", LEN_TERSE);
+   } else {
+      rc = RUN_read  (FILE_RUNTIME);
+      DEBUG_PROG   yLOG_value    ("run"       , rc);
+      rc = yEXEC_find_my_eterm (getpid (), &(my.eterm));
+      DEBUG_PROG   yLOG_value    ("my_eterm"  , rc);
+      --rce;  if (rc < 0) {
+         DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);
+         return rce;
+      }
+      DEBUG_PROG   yLOG_value    ("eterm"     , my.eterm);
+      rc = RUN_by_eterm (my.eterm);
+      DEBUG_PROG   yLOG_value    ("by_eterm"  , rc);
+      --rce;  if (rc < 0) {
+         DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);
+         return rce;
+      }
+      n = rc;
+      strlcpy (my.back_act, g_runs [n].back, LEN_TERSE);
+      strlcpy (my.fore_act, g_runs [n].fore, LEN_TERSE);
+      if (my.desk < 0)  my.desk = yX11_desk_current (NULL);
+      /*> printf ("my.desk  = %d\n", my.desk);                                           <*/
+      my.win  = yX11_win_current (x_name, &x_desk);
+      /*> printf ("my.win   = %ld (%1d) %s\n", my.win, x_desk, x_name);                  <*/
+      /*> sprintf (t, "wmctrl -i -r %ld -T \"YOU ARE HERE\"", my.win);                   <* 
+       *> system (t);                                                                    <*/
+      RUN_gather ();
+      /*> printf ("rpid     = %d\n", getpid ());                                         <*/
+      /*> printf ("my eterm = %d\n", my.eterm);                                          <*/
+      /*> printf ("back     = %c\n", my.back_act);                                       <*/
+      /*> printf ("fore     = %s\n", my.fore_act);                                       <*/
    }
-   DEBUG_PROG   yLOG_value    ("eterm"     , my.eterm);
-   rc = RUN_by_eterm (my.eterm);
-   DEBUG_PROG   yLOG_value    ("by_eterm"  , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);
-      return rce;
-   }
-   n = rc;
-   my.back_act = g_runs [n].back [0];
-   strlcpy (my.fore_act, g_runs [n].fore, LEN_TERSE);
-   if (my.desk < 0)  my.desk = yX11_desk_current (NULL);
-   /*> printf ("my.desk  = %d\n", my.desk);                                           <*/
-   my.win  = yX11_win_current (x_name, &x_desk);
-   /*> printf ("my.win   = %ld (%1d) %s\n", my.win, x_desk, x_name);                  <*/
-   /*> sprintf (t, "wmctrl -i -r %ld -T \"YOU ARE HERE\"", my.win);                   <* 
-    *> system (t);                                                                    <*/
-   RUN_gather ();
-   /*> printf ("rpid     = %d\n", getpid ());                                         <*/
-   /*> printf ("my eterm = %d\n", my.eterm);                                          <*/
-   /*> printf ("back     = %c\n", my.back_act);                                       <*/
-   /*> printf ("fore     = %s\n", my.fore_act);                                       <*/
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -350,20 +401,22 @@ PROG_dusk               (void)
    /*---(begin)--------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(configure)----------------------*/
-   if (my.back_req != '·' || strcmp (my.fore_req, "·") != NULL) {
-      n = RUN_by_eterm (my.eterm);
-      if (my.back_req != '·') {
-         m = BACK_by_abbr (my.back_req);
-         strlcpy (g_runs [n].back, g_backs [m].terse, LEN_TERSE);
+   if (my.eterm > 0) {
+      if (strcmp (my.back_req, "·") != NULL || strcmp (my.fore_req, "·") != NULL) {
+         n = RUN_by_eterm (my.eterm);
+         if (strcmp (my.back_req, "·") != NULL) {
+            m = BACK_by_ref  (my.back_req);
+            strlcpy (g_runs [n].back, g_backs [m].terse, LEN_TERSE);
+         }
+         if (strcmp (my.fore_req, "·") != NULL) {
+            m = FORE_by_ref (my.fore_req);
+            strlcpy (g_runs [n].fore, g_fores [m].refno, LEN_TERSE);
+         }
+         RUN_write (FILE_RUNTIME);
       }
-      if (strcmp (my.fore_req, "·") != NULL) {
-         m = FORE_by_ref (my.fore_req);
-         strlcpy (g_runs [n].fore, g_fores [m].refno, LEN_TERSE);
+      else if (my.here != '·') {
+         RUN_write (FILE_RUNTIME);
       }
-      RUN_write (FILE_RUNTIME);
-   }
-   else if (my.here == 'y') {
-      RUN_write (FILE_RUNTIME);
    }
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
