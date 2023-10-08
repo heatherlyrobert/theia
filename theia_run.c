@@ -24,16 +24,16 @@ RUN_purge               (void)
    for (i = 0; i < MAX_RUN; ++i)  {
       /*---(eterm)----------*/
       g_runs [i].eterm     =  0;
-      strlcpy (g_runs [i].back , "·", LEN_TERSE);
-      strlcpy (g_runs [i].fore , "·", LEN_TERSE);
+      ystrlcpy (g_runs [i].back , "·", LEN_TERSE);
+      ystrlcpy (g_runs [i].fore , "·", LEN_TERSE);
       /*---(window)---------*/
-      strlcpy (g_runs [i].hex  , "·", LEN_LABEL);
+      ystrlcpy (g_runs [i].hex  , "·", LEN_LABEL);
       g_runs [i].ref       =  0;
       g_runs [i].stack     = -1;
       g_runs [i].desk      =  0;
-      strlcpy (g_runs [i].title, "·", LEN_HUND);
+      ystrlcpy (g_runs [i].title, "·", LEN_HUND);
       g_runs [i].type      = '·';
-      strlcpy (g_runs [i].shortcut , "·", LEN_LABEL);
+      ystrlcpy (g_runs [i].shortcut , "·", LEN_LABEL);
       /*---(position)-------*/
       g_runs [i].left      =  0;
       g_runs [i].topp      =  0;
@@ -44,8 +44,8 @@ RUN_purge               (void)
       g_runs [i].locn      = '·';
       /*---(running)--------*/
       g_runs [i].use       =  0;
-      strlcpy (g_runs [i].pubname, "·", LEN_LABEL);
-      strlcpy (g_runs [i].cmdline, "·", LEN_RECD);
+      ystrlcpy (g_runs [i].pubname, "·", LEN_LABEL);
+      ystrlcpy (g_runs [i].cmdline, "·", LEN_RECD);
       g_runs [i].order     =  0;
       /*---(done)-----------*/
    }
@@ -154,14 +154,14 @@ RUN__create             (cchar a_match, cchar a_recd [LEN_RECD])
    }
    DEBUG_CONF   yLOG_info    ("a_recd"    , a_recd);
    /*---(prepare)---------------------*/
-   strlcpy (x_recd, a_recd, LEN_RECD);
+   ystrlcpy (x_recd, a_recd, LEN_RECD);
    p = strtok (x_recd, q);
    DEBUG_CONF   yLOG_point   ("p"         , p);
    n = g_nrun;
    /*---(parse record)----------------*/
    --rce;  while (p != NULL) {
-      strlcpy  (x_field, p, LEN_LABEL);
-      strltrim (x_field, ySTR_BOTH, LEN_LABEL);
+      ystrlcpy  (x_field, p, LEN_LABEL);
+      ystrltrim (x_field, ySTR_BOTH, LEN_LABEL);
       l = strlen (x_field);
       DEBUG_CONF   yLOG_complex ("parse"     , "%d, %2då%sæ", c, l, x_field);
       switch (c) {
@@ -186,7 +186,7 @@ RUN__create             (cchar a_match, cchar a_recd [LEN_RECD])
                DEBUG_CONF   yLOG_note    ("default value");
             } else { rc = --rce; break; }
          }
-         strlcpy  (x_back, x_field, LEN_TERSE);
+         ystrlcpy  (x_back, x_field, LEN_TERSE);
          DEBUG_CONF   yLOG_info    ("x_back"    , x_back);
          break;
       case  2 :  /* foreground           */
@@ -195,7 +195,7 @@ RUN__create             (cchar a_match, cchar a_recd [LEN_RECD])
                DEBUG_CONF   yLOG_note    ("default value");
             } else { rc = --rce; break; }
          }
-         strlcpy  (x_fore, x_field, LEN_TERSE);
+         ystrlcpy  (x_fore, x_field, LEN_TERSE);
          DEBUG_CONF   yLOG_info    ("x_fore"    , x_fore);
          break;
       case  3 :  /* window reference     */
@@ -204,11 +204,11 @@ RUN__create             (cchar a_match, cchar a_recd [LEN_RECD])
             break;
          } else if (x_field [0] == 'õ') {
             DEBUG_CONF   yLOG_note    ("hex value");
-            strlcpy  (x_hex , x_field, LEN_LABEL);
-            strldchg (x_hex , '0', '·', LEN_LABEL);
+            ystrlcpy  (x_hex , x_field, LEN_LABEL);
+            ystrldchg (x_hex , '0', '·', LEN_LABEL);
             if (x_hex [3] == '·')  x_hex [3] = '0';
-            strldchg (x_field, '·', '0', LEN_LABEL);
-            strl2hex (x_field, &v, LEN_LABEL);
+            ystrldchg (x_field, '·', '0', LEN_LABEL);
+            ystrl2hex (x_field, &v, LEN_LABEL);
             x_ref = v;
          } else {
             DEBUG_CONF   yLOG_note    ("long value");
@@ -247,11 +247,11 @@ RUN__create             (cchar a_match, cchar a_recd [LEN_RECD])
    if (x_exist < 0) {
       g_runs [n].eterm = x_eterm;
       DEBUG_CONF   yLOG_value   (".eterm"    , g_runs [n].eterm);
-      strlcpy  (g_runs [n].back, x_back, LEN_TERSE);
+      ystrlcpy  (g_runs [n].back, x_back, LEN_TERSE);
       DEBUG_CONF   yLOG_info    (".back"     , g_runs [n].back);
-      strlcpy  (g_runs [n].fore, x_fore, LEN_TERSE);
+      ystrlcpy  (g_runs [n].fore, x_fore, LEN_TERSE);
       DEBUG_CONF   yLOG_info    (".fore"     , g_runs [n].fore);
-      strlcpy  (g_runs [n].hex , x_hex , LEN_LABEL);
+      ystrlcpy  (g_runs [n].hex , x_hex , LEN_LABEL);
       DEBUG_CONF   yLOG_info    (".hex"      , g_runs [n].fore);
       g_runs [n].ref = x_ref;
       DEBUG_CONF   yLOG_value   (".ref"      , g_runs [n].ref);
@@ -389,10 +389,10 @@ RUN__classify         (cchar a_title [LEN_HUND], cchar a_pubname [LEN_LABEL], cc
    if (strcmp (a_pubname, "vi") == 0) {
       if (strncmp (a_cmdline, "vi -c call HBUF_on() -c call HTAG_on() " , 39) == 0) {
          if (strncmp (a_cmdline + 39, "master.unit ", 12) != 0) {
-            strlcpy (t, a_cmdline + 39, LEN_HUND);
+            ystrlcpy (t, a_cmdline + 39, LEN_HUND);
             x_type = 'E';
          } else {
-            strlcpy (t, a_cmdline + 51, LEN_HUND);
+            ystrlcpy (t, a_cmdline + 51, LEN_HUND);
             x_type = 'U';
          }
          p = strchr (t, '.');
@@ -400,14 +400,14 @@ RUN__classify         (cchar a_title [LEN_HUND], cchar a_pubname [LEN_LABEL], cc
          p = strchr (t, '_');
          if (p != NULL)  p [0] = '\0';
       } else if (strcmp (a_cmdline + l - 5, ".ulog") == 0) {
-         strlcpy (t, a_cmdline + 30, LEN_HUND);
+         ystrlcpy (t, a_cmdline + 30, LEN_HUND);
          p = strchr (t, '.');
          if (p != NULL)  p [0] = '\0';
          p = strchr (t, '_');
          if (p != NULL)  p [0] = '\0';
          x_type = 'L';
       } else if (strncmp (a_cmdline, "vi ", 3) == 0) {
-         strlcpy (t, a_cmdline + 3, LEN_HUND);
+         ystrlcpy (t, a_cmdline + 3, LEN_HUND);
          p = strchr (t, ' ');
          if (p != NULL)  p [0] = '\0';
          x_type = 'V';
@@ -418,33 +418,33 @@ RUN__classify         (cchar a_title [LEN_HUND], cchar a_pubname [LEN_LABEL], cc
    else if (strcmp (a_pubname, "less") == 0) {
       if (strcmp (a_cmdline + l - 5, ".urun") == 0) {
          p = strrchr (a_cmdline, ' ');
-         strlcpy (t, p + 1, LEN_HUND);
+         ystrlcpy (t, p + 1, LEN_HUND);
          p = strchr (t, '.');
          if (p != NULL)  p [0] = '\0';
          p = strchr (t, '_');
          if (p != NULL)  p [0] = '\0';
          x_type = 'R';
       } else if (strcmp (a_cmdline, "/usr/bin/less") == 0) {
-         strlcpy (t, "man"      , LEN_HUND);
+         ystrlcpy (t, "man"      , LEN_HUND);
          x_type = 'm';
       } else {
-         strlcpy (t, "·········", LEN_HUND);
+         ystrlcpy (t, "·········", LEN_HUND);
          x_type = 'l';
       }
    }
    else if (strcmp (a_pubname, "theia") == 0) {
-      strlcpy (t, "´·´·´·´·´", LEN_HUND);
+      ystrlcpy (t, "´·´·´·´·´", LEN_HUND);
       x_type = 'Ï';
    }
    else {
-      strlcpy (t, a_pubname, LEN_HUND);
+      ystrlcpy (t, a_pubname, LEN_HUND);
       x_type = '-';
    }
    /*---(save-back)----------------*/
-   if (x_type == 'U')  strlcat (t, "_unit", LEN_LABEL);
-   if (x_type == 'R')  strlcat (t, "_urun", LEN_LABEL);
-   if (x_type == 'L')  strlcat (t, "_ulog", LEN_LABEL);
-   strlcpy (a_note, t, LEN_LABEL);
+   if (x_type == 'U')  ystrlcat (t, "_unit", LEN_LABEL);
+   if (x_type == 'R')  ystrlcat (t, "_urun", LEN_LABEL);
+   if (x_type == 'L')  ystrlcat (t, "_ulog", LEN_LABEL);
+   ystrlcpy (a_note, t, LEN_LABEL);
    /*---(return)-------------------*/
    return x_type;
 }
@@ -487,7 +487,7 @@ RUN__stacking         (char a_unit)
     *>    /+---(handle)----------------------+/                                                                                  <* 
     *>    l = strlen (p);                                                                                                        <* 
     *>    DEBUG_FILE   yLOG_complex ("p"         , "%2d %2då%sæ", c, l, p);                                                      <* 
-    *>    strl2hex (p, &v, LEN_LABEL);                                                                                           <* 
+    *>    ystrl2hex (p, &v, LEN_LABEL);                                                                                           <* 
     *>    DEBUG_FILE   yLOG_value   ("v"         , v);                                                                           <* 
     *>    n = RUN_by_ref (v);                                                                                                    <* 
     *>    if (n >= 0)  g_runs [n].stack = c;                                                                                     <* 
@@ -543,7 +543,7 @@ RUN_gather            (void)
       i = RUN_by_ref (x_id);
       if (i >= 0) {
          g_runs [i].desk = x_desk;
-         strlcpy (g_runs [i].title, x_title, LEN_HUND);
+         ystrlcpy (g_runs [i].title, x_title, LEN_HUND);
          g_runs [i].left = x_left;
          g_runs [i].topp = x_topp;
          g_runs [i].scrn = x_scrn;
@@ -604,8 +604,8 @@ RUN_write             (cchar a_name [LEN_PATH])
       if (i % 5 == 0)  fprintf (f, "#-epid  -back-  fg  ---ref---  st  d  ---title--------------------------------------------------------------------------------------------  t  ---shortcut---------  left  topp  s  l  wide  tall  z \n");
       if (g_runs [i].ref == 0)  strcpy (t, "·");
       else {
-         strl4hex (g_runs [i].ref, t, 4, 'x', LEN_LABEL);
-         strldchg (t, '0', '·', LEN_LABEL);
+         ystrl4hex (g_runs [i].ref, t, 4, 'x', LEN_LABEL);
+         ystrldchg (t, '0', '·', LEN_LABEL);
          if (t [3] == '·')  t [3] = '0';
       }
       if (g_runs [i].stack == -1)  strcpy (s, " ·");
@@ -646,7 +646,7 @@ RUN__unit               (char *a_question, int n)
    int         c           =    0;
    char        t           [LEN_LABEL] = "";
    /*---(prepare)------------------------*/
-   strlcpy  (unit_answer, "RUN              : question not understood", LEN_HUND);
+   ystrlcpy  (unit_answer, "RUN              : question not understood", LEN_HUND);
    /*---(crontab name)-------------------*/
    if      (strcmp (a_question, "count"   )        == 0) {
       snprintf (unit_answer, LEN_HUND, "RUN count        : %d", g_nrun);

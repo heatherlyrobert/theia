@@ -38,8 +38,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "1.--, running every day in production"
 #define     P_VERMINOR  "1.0-, changed from hack to maintainable program."
-#define     P_VERNUM    "1.0d"
-#define     P_VERTXT    "adapted to use (mostly) with console also"
+#define     P_VERNUM    "1.0e"
+#define     P_VERTXT    "slighly cleaned up after new system install"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -225,27 +225,29 @@ extern int    g_crun;
 
 typedef    struct cACCESSOR  tACCESSOR;
 struct cACCESSOR {
+   /*---(overall)--------------*/
+   char        term        [LEN_LABEL];     /* type of terminal               */
    /*---(arguments)------------*/
-   char      identify;
-   char      back_act   [LEN_TERSE];
-   char      back_req   [LEN_TERSE];
-   char      fore_act   [LEN_TERSE];
-   char      fore_req   [LEN_TERSE];
-   char      report;
-   char      here;
-   char      shortcut      [LEN_LABEL];
-   float     scale;
-   char      ygrid;
-   char      xgrid;
-   char      range;
-   char      list;
-   char      extra;
+   char        identify;
+   char        back_act    [LEN_TERSE];
+   char        back_req    [LEN_TERSE];
+   char        fore_act    [LEN_TERSE];
+   char        fore_req    [LEN_TERSE];
+   char        report;
+   char        here;
+   char        shortcut    [LEN_LABEL];
+   float       scale;
+   char        ygrid;
+   char        xgrid;
+   char        range;
+   char        list;
+   char        extra;
    /*---(files)----------------*/
-   int       custom;
-   int       theme;
-   int       eterm;
-   char      desk;
-   long      win;
+   int         custom;
+   int         theme;
+   int         eterm;
+   char        desk;
+   long        win;
    /*---(files)----------------*/
 };
 extern tACCESSOR my;

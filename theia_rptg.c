@@ -183,6 +183,7 @@ REPORT_quarter     (char *a_refno)
    char        n           =    0;
    char        i           =    0;
    char        x_fg        =    0;
+   DEBUG_PROG  yLOG_enter   (__FUNCTION__);
    n = FORE_by_ref (a_refno);
    if (n < 0)  return 0;
    printf ("theia-euryphaessa (wide-shinning) terminal configuration for ansi 16-color terms\n");
@@ -202,5 +203,7 @@ REPORT_quarter     (char *a_refno)
       printf ("\n");
    }
    printf ("theia --quarter is my test for color schemes; perform here or i toss it\n");
+   DEBUG_PROG  yLOG_exit    (__FUNCTION__);
+   return 0;
 }
 

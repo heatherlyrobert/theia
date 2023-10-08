@@ -16,10 +16,10 @@ BACK_purge              (void)
    DEBUG_CONF   yLOG_senter  (__FUNCTION__);
    /*---(clear table)--------------------*/
    for (i = 0; i < MAX_BACK; ++i)  {
-      strlcpy (g_backs [i].refno, "·", LEN_TERSE);
-      strlcpy (g_backs [i].terse, "·", LEN_TERSE);
-      strlcpy (g_backs [i].name , "·", LEN_LABEL);
-      strlcpy (g_backs [i].hex  , "·", LEN_TERSE);
+      ystrlcpy (g_backs [i].refno, "·", LEN_TERSE);
+      ystrlcpy (g_backs [i].terse, "·", LEN_TERSE);
+      ystrlcpy (g_backs [i].name , "·", LEN_LABEL);
+      ystrlcpy (g_backs [i].hex  , "·", LEN_TERSE);
       g_backs [i].value     =   0;
    }
    g_nback = 0;
@@ -74,13 +74,13 @@ BACK_create             (cchar a_recd [LEN_RECD])
       return rce;
    }
    /*---(prepare)---------------------*/
-   strlcpy (x_recd, a_recd, LEN_RECD);
+   ystrlcpy (x_recd, a_recd, LEN_RECD);
    p = strtok (x_recd, q);
    DEBUG_CONF   yLOG_point   ("p"         , p);
    /*---(parse record)----------------*/
    --rce;  while (p != NULL) {
-      strlcpy  (t, p, LEN_LABEL);
-      strltrim (t, ySTR_BOTH, LEN_LABEL);
+      ystrlcpy  (t, p, LEN_LABEL);
+      ystrltrim (t, ySTR_BOTH, LEN_LABEL);
       l = strlen (t);
       DEBUG_CONF   yLOG_complex ("parse"     , "%d, %2då%sæ", c, l, t);
       switch (c) {
@@ -91,26 +91,26 @@ BACK_create             (cchar a_recd [LEN_RECD])
             DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
             return rce;
          }
-         strlcpy  (g_backs [g_nback].refno, t, LEN_TERSE);
+         ystrlcpy  (g_backs [g_nback].refno, t, LEN_TERSE);
          DEBUG_CONF   yLOG_info    ("refno"     , g_backs [g_nback].refno);
          break;
       case  2 :  /* color terse          */
          if (l < 5)  { rc = -c; break; }
-         strlcpy  (g_backs [g_nback].terse, t, LEN_TERSE);
+         ystrlcpy  (g_backs [g_nback].terse, t, LEN_TERSE);
          DEBUG_CONF   yLOG_info    ("terse"     , g_backs [g_nback].terse);
          break;
       case  3 :  /* full description     */
          if (l < 3)  { rc = -c; break; }
-         strlcpy  (g_backs [g_nback].name , t, LEN_LABEL);
+         ystrlcpy  (g_backs [g_nback].name , t, LEN_LABEL);
          DEBUG_CONF   yLOG_info    ("name"      , g_backs [g_nback].name);
          break;
       case  4 :  /* old color */
          break;
       case  5 :  /* hex color value      */
          if (l != 7)  { rc = -c; break; }
-         strlcpy  (g_backs [g_nback].hex  , t, LEN_TERSE);
+         ystrlcpy  (g_backs [g_nback].hex  , t, LEN_TERSE);
          DEBUG_CONF   yLOG_info    ("hex"       , g_backs [g_nback].hex);
-         rc = strl2hex (t, &v, LEN_TERSE);
+         rc = ystrl2hex (t, &v, LEN_TERSE);
          g_backs [g_nback].value = v;
          DEBUG_CONF   yLOG_value   ("value"     , g_backs [g_nback].value);
          break;
@@ -151,10 +151,10 @@ BACK_set           (cchar a_ref [LEN_TERSE])
       return rce;
    }
    /*---(set actual)---------------------*/
-   strlcpy (my.back_act, a_ref, LEN_TERSE);
+   ystrlcpy (my.back_act, a_ref, LEN_TERSE);
    /*---(set background)-----------------*/
    /*> DEBUG_GRAF  yLOG_complex ("back"      , "%2d, %c, %s, %s, %s", g_cback, g_backs [g_cback].abbr, g_backs [g_cback].terse, g_backs [g_cback].name, g_backs [g_cback].hex);   <*/
-   /*> DEBUG_GRAF  yLOG_complex ("color"     , "%10d, %s", g_backs [g_cback].value, x_str);   <*/
+   DEBUG_GRAF  yLOG_complex ("color"     , "%06x", g_backs [g_cback].value);
    printf ("\e]6;0;true");
    printf ("\e]6;2;tint;bg;0x%06x", g_backs [n].value);
    /*---(complete)-----------------------*/
@@ -201,7 +201,7 @@ BACK__unit              (char *a_question, int n)
    /*---(locals)-----------+-----------+-*/
    int         c           =    0;
    /*---(prepare)------------------------*/
-   strlcpy  (unit_answer, "BACK             : question not understood", LEN_HUND);
+   ystrlcpy  (unit_answer, "BACK             : question not understood", LEN_HUND);
    /*---(crontab name)-------------------*/
    if      (strcmp (a_question, "count"   )        == 0) {
       snprintf (unit_answer, LEN_HUND, "BACK count       : %d", g_nback);

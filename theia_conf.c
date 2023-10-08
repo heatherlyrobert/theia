@@ -19,7 +19,7 @@ CONF_read          (void)
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
    /*---(open file)----------------------*/
    f = fopen(FILE_SCHEMES, "r");
-   --rce;  if (rc != 0) {
+   --rce;  if (f == NULL) {
       DEBUG_CONF   yLOG_exit    (__FUNCTION__);
       return rce;
    }

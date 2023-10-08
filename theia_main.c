@@ -34,7 +34,7 @@ main               (int a_argc, char *a_argv [])
    /*---(catch up fifo)------------------*/
    /*> rc = FIFO_listen (FILE_FIFO);                                                  <*/
    /*> rc = FIFO_eater (FILE_FIFO);                                                   <*/
-   rc = FIFO_eater ("/tmp/xprop.txt");
+   /*> rc = FIFO_eater ("/tmp/xprop.txt");                                            <*/
    DEBUG_PROG   yLOG_value    ("listen"    , rc);
    /*---(run)----------------------------*/
    if (my.eterm > 0)  {
@@ -45,6 +45,7 @@ main               (int a_argc, char *a_argv [])
    if (strcmp (my.fore_req, "·") != 0) {
       FORE_set (my.fore_req);
    }
+   DEBUG_PROG   yLOG_char     ("report"    , my.report);
    switch (my.report) {
    case  '·' : break;
    case  '!' : REPORT_quarter (my.fore_act);      break;

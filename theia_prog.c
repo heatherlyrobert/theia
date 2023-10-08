@@ -32,7 +32,7 @@ PROG_version       (void)
 /*====================------------------------------------====================*/
 /*===----                       pre-initialization                     ----===*/
 /*====================------------------------------------====================*/
-static void      o___PREINIT_________________o (void) {;}
+static void      o___PREINIT___________o (void) {;}
 
 char       /*----: very first setup ------------------s-----------------------*/
 PROG__header            (void)
@@ -92,7 +92,7 @@ PROG_urgents            (int a_argc, char *a_argv [])
 /*====================------------------------------------====================*/
 /*===----                      startup functions                       ----===*/
 /*====================------------------------------------====================*/
-static void      o___STARTUP_________________o (void) {;}
+static void      o___STARTUP____________o (void) {;}
 
 char         /*--> initialize variables ------------------[ ------ [ ------ ]-*/
 PROG__init              (int a_argc, char *a_argv [])
@@ -122,6 +122,20 @@ PROG__init              (int a_argc, char *a_argv [])
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   /*---(check terminal)-----------------*/
+   strcpy (my.term, "");
+   ystrlcpy (my.term, getenv ("TERM"), LEN_LABEL);
+   DEBUG_PROG   yLOG_info     ("TERM"      , my.term);
+   --rce;  if (strcmp (my.term, "linux") == 0) {
+      DEBUG_PROG   yLOG_note    ("using linux console");
+   } else if  (strcmp (my.term, "Eterm") == 0) {
+      DEBUG_PROG   yLOG_note    ("using eterm");
+   } else {
+      printf ("theia : unknown terminal type, no action\n");
+      DEBUG_PROG   yLOG_note    ("unknown terminal type");
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(initialize)---------------------*/
    FORE_purge ();
    BACK_purge ();
@@ -130,8 +144,8 @@ PROG__init              (int a_argc, char *a_argv [])
    my.theme    = 0;
    my.report   = '·';
    my.here     = '·';
-   strlcpy (my.back_req, "·", LEN_TERSE);
-   strlcpy (my.fore_req, "·", LEN_TERSE);
+   ystrlcpy (my.back_req, "·", LEN_TERSE);
+   ystrlcpy (my.fore_req, "·", LEN_TERSE);
    my.custom   = -1;
    g_nback     = 0;
    g_cback     = 0;
@@ -219,20 +233,33 @@ PROG__args              (int a_argc, char *a_argv [])
       else if (len == 1 && a [0] >= 'a' && a [0] <= 'z') strcpy (my.back_req, a);
       else if (len == 2 && strchr ("abcdefghijklmnopqrstuvwxyz", a [0]) != 0 &&
             strchr ("[-+]", a [1]) != NULL)
-         strlcpy (my.back_req, a, LEN_TERSE);
+         ystrlcpy (my.back_req, a, LEN_TERSE);
       /*---(foreground)------------------*/
       else if (len == 2 && strchr ("0123456789abcdef", a [0]) != 0 &&
             strchr ("0123456789abcdef", a [1]) != 0)
-         strlcpy (my.fore_req, a, LEN_TERSE);
+         ystrlcpy (my.fore_req, a, LEN_TERSE);
       /*---(unknown)---------------------*/
       else {
-         strlcpy (my.shortcut, a, LEN_LABEL);
+         ystrlcpy (my.shortcut, a, LEN_LABEL);
          DEBUG_ARGS   yLOG_info   ("shortcut"  , my.shortcut);
       }
    }
    /*---(summarize)----------------------*/
    DEBUG_ARGS   yLOG_value  ("entries"   , x_total);
    DEBUG_ARGS   yLOG_value  ("arguments" , x_args);
+   DEBUG_ARGS   yLOG_char   ("identify"  , my.identify);
+   DEBUG_ARGS   yLOG_char   ("report"    , my.report);
+   DEBUG_ARGS   yLOG_char   ("here"      , my.here);
+   DEBUG_ARGS   yLOG_value  ("desk"      , my.desk);
+   DEBUG_ARGS   yLOG_double ("scale"     , my.scale);
+   DEBUG_ARGS   yLOG_value  ("range"     , my.range);
+   DEBUG_ARGS   yLOG_value  ("ygrid"     , my.ygrid);
+   DEBUG_ARGS   yLOG_value  ("xgrid"     , my.xgrid);
+   DEBUG_ARGS   yLOG_char   ("list"      , my.list);
+   DEBUG_ARGS   yLOG_char   ("extra"     , my.extra);
+   DEBUG_ARGS   yLOG_info   ("back_req"  , my.back_req);
+   DEBUG_ARGS   yLOG_info   ("fore_req"  , my.fore_req);
+   DEBUG_ARGS   yLOG_info   ("shortcut"  , my.shortcut);
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -282,7 +309,7 @@ PROG__begin             (void)
             system (x_recd);
          }
       }
-      strlcpy (my.fore_req, "95", LEN_TERSE);
+      ystrlcpy (my.fore_req, "95", LEN_TERSE);
    }
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
@@ -330,7 +357,7 @@ PROG_startup            (int a_argc, char *a_argv [])
 /*====================------------------------------------====================*/
 /*===----                       execution support                      ----===*/
 /*====================------------------------------------====================*/
-static void      o___EXECUTION_______________o (void) {;}
+static void      o___EXECUTION__________o (void) {;}
 
 char
 PROG_dawn               (void)
@@ -341,20 +368,23 @@ PROG_dawn               (void)
    char        n           =    0;
    char        x_name      [LEN_HUND]  = "";
    char        x_desk      =    0;
-   char        t           [LEN_RECD]  = "";
    /*---(begin)--------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(configure)----------------------*/
    rc = CONF_read ();
    DEBUG_PROG   yLOG_value    ("conf"      , rc);
+   if (rc < 0) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(check terminal type)------------*/
-   strlcpy (t, getenv ("TERM"), LEN_LABEL);
-   if (strcmp (t, "linux") == 0) {
+   DEBUG_PROG   yLOG_info     ("TERM"      , my.term);
+   --rce;  if (strcmp (my.term, "linux") == 0) {
       printf ("linux terminal\n");
       my.eterm = -1;
-      strlcpy (my.fore_req, "99", LEN_TERSE);
-      strlcpy (my.fore_act, "95", LEN_TERSE);
-   } else {
+      ystrlcpy (my.fore_req, "99", LEN_TERSE);
+      ystrlcpy (my.fore_act, "95", LEN_TERSE);
+   } else if (strcmp (my.term, "Eterm") == 0) {
       rc = RUN_read  (FILE_RUNTIME);
       DEBUG_PROG   yLOG_value    ("run"       , rc);
       rc = yEXEC_find_my_eterm (getpid (), &(my.eterm));
@@ -371,8 +401,8 @@ PROG_dawn               (void)
          return rce;
       }
       n = rc;
-      strlcpy (my.back_act, g_runs [n].back, LEN_TERSE);
-      strlcpy (my.fore_act, g_runs [n].fore, LEN_TERSE);
+      ystrlcpy (my.back_act, g_runs [n].back, LEN_TERSE);
+      ystrlcpy (my.fore_act, g_runs [n].fore, LEN_TERSE);
       if (my.desk < 0)  my.desk = yX11_desk_current (NULL);
       /*> printf ("my.desk  = %d\n", my.desk);                                           <*/
       my.win  = yX11_win_current (x_name, &x_desk);
@@ -406,11 +436,11 @@ PROG_dusk               (void)
          n = RUN_by_eterm (my.eterm);
          if (strcmp (my.back_req, "·") != NULL) {
             m = BACK_by_ref  (my.back_req);
-            strlcpy (g_runs [n].back, g_backs [m].terse, LEN_TERSE);
+            ystrlcpy (g_runs [n].back, g_backs [m].terse, LEN_TERSE);
          }
          if (strcmp (my.fore_req, "·") != NULL) {
             m = FORE_by_ref (my.fore_req);
-            strlcpy (g_runs [n].fore, g_fores [m].refno, LEN_TERSE);
+            ystrlcpy (g_runs [n].fore, g_fores [m].refno, LEN_TERSE);
          }
          RUN_write (FILE_RUNTIME);
       }

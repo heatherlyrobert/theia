@@ -52,7 +52,7 @@ FIFO__current           (cchar a_hex [LEN_LABEL])
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   strl2hex (a_hex, &v, LEN_LABEL);
+   ystrl2hex (a_hex, &v, LEN_LABEL);
    DEBUG_PROG   yLOG_value   ("v"         , v);
    /*---(get new current)----------------*/
    o =  RUN_by_ref (v);
@@ -93,7 +93,7 @@ FIFO__listener          (cchar a_recd [LEN_RECD])
    double      v           =  0.0;
    if (a_recd == NULL)  return 0;
    if (strncmp (a_recd, "_NET_ACTIVE_WINDOW(WINDOW): window id # ", 40) == 0) {
-      strlcpy (t, a_recd + 40, LEN_LABEL);
+      ystrlcpy (t, a_recd + 40, LEN_LABEL);
       FIFO__current (t);
       return 0;
    }
@@ -150,12 +150,12 @@ FIFO_eater              (cchar a_name [LEN_PATH])
    /*> DEBUG_PROG   yLOG_info    ("strerror"  , strerror (errno));                    <*/
    /*---(loop)---------------------------*/
    while (1) {
-      DEBUG_PROG   yLOG_complex ("read"      , "%2d, %3d, %c", l, x_ch, chrvisible (x_ch));
+      DEBUG_PROG   yLOG_complex ("read"      , "%2d, %3d, %c", l, x_ch, ychrvisible (x_ch));
       if (x_ch >= 0 && x_ch != '\n' && l < 100) {
          x_recd [l++] = x_ch;
       } else if (l > 0) {
          if (strncmp (x_recd, "_NET_ACTIVE_WINDOW(WINDOW): window id # ", 40) == 0) {
-            strlcpy (t, x_recd + 40, LEN_LABEL);
+            ystrlcpy (t, x_recd + 40, LEN_LABEL);
             FIFO__current (t);
          }
          for (i = 0; i < LEN_RECD; ++i) x_recd [i] = '\0'; 

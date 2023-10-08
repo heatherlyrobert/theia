@@ -23,11 +23,11 @@ FORE_purge              (void)
    DEBUG_CONF   yLOG_senter  (__FUNCTION__);
    /*---(clear table)--------------------*/
    for (i = 0; i < MAX_FORE; ++i)  {
-      strlcpy (g_fores [i].refno, "·", LEN_TERSE);
-      strlcpy (g_fores [i].name , "·", LEN_LABEL);
+      ystrlcpy (g_fores [i].refno, "·", LEN_TERSE);
+      ystrlcpy (g_fores [i].name , "·", LEN_LABEL);
       g_fores [i].style     = '·';
       for (j = 0; j < MAX_ENTRIES; ++j)  {
-         strlcpy (g_fores [i].hex [j]  , "·", LEN_TERSE);
+         ystrlcpy (g_fores [i].hex [j]  , "·", LEN_TERSE);
          g_fores [i].value [j]  =   0;
       }
    }
@@ -84,31 +84,31 @@ FORE_create             (cchar a_recd [LEN_RECD])
       return rce;
    }
    /*---(prepare)---------------------*/
-   strlcpy (x_recd, a_recd, LEN_RECD);
+   ystrlcpy (x_recd, a_recd, LEN_RECD);
    p = strtok (x_recd, q);
    DEBUG_CONF   yLOG_point   ("p"         , p);
    /*---(parse record)----------------*/
    --rce;  while (p != NULL) {
-      strlcpy  (t, p, LEN_LABEL);
-      strltrim (t, ySTR_BOTH, LEN_LABEL);
+      ystrlcpy  (t, p, LEN_LABEL);
+      ystrltrim (t, ySTR_BOTH, LEN_LABEL);
       l = strlen (t);
       DEBUG_CONF   yLOG_complex ("parse"     , "%d, %2då%sæ", c, l, t);
       switch (c) {
       case  1 :  /* font color refno     */
          if (l != 3)  { rc = -c; break; }
-         rc = strl2hex (t, &v, LEN_TERSE);
+         rc = ystrl2hex (t, &v, LEN_TERSE);
          if (rc <  0)  { rc = -c; break; }
          n = FORE_by_ref  (t + 1);
          if (n >= 0) {
             DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
             return rce;
          }
-         strlcpy  (g_fores [g_nfore].refno, t + 1, LEN_TERSE);
+         ystrlcpy  (g_fores [g_nfore].refno, t + 1, LEN_TERSE);
          DEBUG_CONF   yLOG_info    ("refno"     , g_fores [g_nfore].refno);
          break;
       case  2 :  /* full name            */
          if (l < 3)  { rc = -c; break; }
-         strlcpy  (g_fores [g_nfore].name , t, LEN_LABEL);
+         ystrlcpy  (g_fores [g_nfore].name , t, LEN_LABEL);
          DEBUG_CONF   yLOG_info    ("name"      , g_fores [g_nfore].name);
          break;
       case  3 :  /* style                */
@@ -118,9 +118,9 @@ FORE_create             (cchar a_recd [LEN_RECD])
          break;
       default  : /* hex values           */
          if (l != 7)  { rc = -c; break; }
-         strlcpy  (g_fores [g_nfore].hex [c - 4] , t, LEN_TERSE);
+         ystrlcpy  (g_fores [g_nfore].hex [c - 4] , t, LEN_TERSE);
          DEBUG_CONF   yLOG_info    ("hex"       , g_fores [g_nfore].hex [c - 4]);
-         rc = strl2hex (t, &v, LEN_TERSE);
+         rc = ystrl2hex (t, &v, LEN_TERSE);
          if (rc <  0)  { rc = -c; break; }
          g_fores [g_nfore].value [c - 4] = v;
          DEBUG_CONF   yLOG_value   ("value"     , g_fores [g_nfore].value [c - 4]);
@@ -174,7 +174,7 @@ FORE_set           (cchar a_ref [LEN_TERSE])
    }
    DEBUG_PROG   yLOG_info    ("name"      , g_fores [n].name);
    /*---(set actual)---------------------*/
-   strlcpy (my.fore_act, a_ref, LEN_TERSE);
+   ystrlcpy (my.fore_act, a_ref, LEN_TERSE);
    /*---(set background)-----------------*/
    for (i = 0; i < 16; ++i) {
       x = ((int) i / 2) - 0 + ((i % 2) *  8);
@@ -199,7 +199,7 @@ FORE__unit              (char *a_question, int n)
    /*---(locals)-----------+-----------+-*/
    int         c           =    0;
    /*---(prepare)------------------------*/
-   strlcpy  (unit_answer, "FORE             : question not understood", LEN_HUND);
+   ystrlcpy  (unit_answer, "FORE             : question not understood", LEN_HUND);
    /*---(crontab name)-------------------*/
    if      (strcmp (a_question, "count"   )        == 0) {
       snprintf (unit_answer, LEN_HUND, "FORE count       : %d", g_nfore);

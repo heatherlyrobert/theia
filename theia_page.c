@@ -107,10 +107,10 @@ PAGE__single            (char a_type, short a_wide, char a_prefix [LEN_TERSE], c
    /*---(prefix)-------------------------*/
    if (a_prefix != NULL) {
       switch (a_type) {
-      case 'h' : strlcpy (a_prefix, "   Ï ", LEN_TERSE);   break;
-      case 'e' : strlcpy (a_prefix, "·····", LEN_TERSE);   break;
-      case 'm' : strlcpy (a_prefix, "   Ï ", LEN_TERSE);   break;
-      case '-' : strlcpy (a_prefix, "     ", LEN_TERSE);   break;
+      case 'h' : ystrlcpy (a_prefix, "   Ï ", LEN_TERSE);   break;
+      case 'e' : ystrlcpy (a_prefix, "·····", LEN_TERSE);   break;
+      case 'm' : ystrlcpy (a_prefix, "   Ï ", LEN_TERSE);   break;
+      case '-' : ystrlcpy (a_prefix, "     ", LEN_TERSE);   break;
       }
    }
    /*---(ends)---------------------------*/
@@ -157,10 +157,10 @@ PAGE__single            (char a_type, short a_wide, char a_prefix [LEN_TERSE], c
    /*---(breaks)-------------------------*/
    if (a_break != NULL) {
       switch (a_type) {
-      case 'h' : strlcpy (a_break, "   ", LEN_TERSE);   break;
-      case 'e' : strlcpy (a_break, "···", LEN_TERSE);   break;
-      case 'm' : strlcpy (a_break, " · ", LEN_TERSE);   break;
-      case '-' : strlcpy (a_break, "   ", LEN_TERSE);   break;
+      case 'h' : ystrlcpy (a_break, "   ", LEN_TERSE);   break;
+      case 'e' : ystrlcpy (a_break, "···", LEN_TERSE);   break;
+      case 'm' : ystrlcpy (a_break, " · ", LEN_TERSE);   break;
+      case '-' : ystrlcpy (a_break, "   ", LEN_TERSE);   break;
       }
    }
    /*---(complete)-----------------------*/
@@ -174,15 +174,15 @@ PAGE__line              (char x_grid, cchar a_prefix [LEN_TERSE], cchar a_single
    char        x_suffix    [LEN_TERSE] = "";
    char        l           =    0;
    for (i = 0; i < LEN_FULL; ++i)  r_desk [i] = '\0';
-   strlcpy (r_desk, a_prefix, LEN_FULL);
+   ystrlcpy (r_desk, a_prefix, LEN_FULL);
    for (i = 0; i < x_grid; ++i) {
-      if (i > 0)  strlcat (r_desk, a_break, LEN_FULL);
-      strlcat (r_desk, a_single, LEN_FULL);
+      if (i > 0)  ystrlcat (r_desk, a_break, LEN_FULL);
+      ystrlcat (r_desk, a_single, LEN_FULL);
    }
    l = strlen (a_prefix);
    for (i = 0; i < LEN_TERSE; ++i)  x_suffix [i] = '\0';
    for (i = 0; i < l        ; ++i)  x_suffix [i] = a_prefix [l - i - 1];
-   strlcat (r_desk, x_suffix, LEN_FULL);
+   ystrlcat (r_desk, x_suffix, LEN_FULL);
    return 0;
 }
 
@@ -258,13 +258,13 @@ PAGE__outline           (char a_ygrid, char a_xgrid)
       else               sprintf (s_desk [y + 1], "   · ·                                                                          · ·   ");
    }
    /*---(labels)-------------------------*/
-   strlcpy (t, "upper screen", LEN_LABEL);
+   ystrlcpy (t, "upper screen", LEN_LABEL);
    l = strlen (t);
    for (i = 0; i < l; ++i) {
       y = 14 - (l / 2) + i;
       s_desk [y][ 1] = s_desk [y][84] = t [i];
    }
-   strlcpy (t, "lower screen", LEN_LABEL);
+   ystrlcpy (t, "lower screen", LEN_LABEL);
    l = strlen (t);
    for (i = 0; i < l; ++i) {
       y = 39 - (l / 2) + i;
@@ -648,7 +648,7 @@ PAGE__unit              (char *a_question, int n)
    /*---(locals)-----------+-----------+-*/
    int         c           =    0;
    /*---(prepare)------------------------*/
-   strlcpy  (unit_answer, "PAGE             : question not understood", LEN_RECD);
+   ystrlcpy  (unit_answer, "PAGE             : question not understood", LEN_RECD);
    /*---(crontab name)-------------------*/
    if      (strcmp (a_question, "full"    )        == 0) {
       snprintf (unit_answer, LEN_RECD, "PAGE full        :  %4d  %2d  %3d        ,  %4d  %2d  %3d", s_xfull, s_xmult, s_xchar, s_yfull, s_ymult, s_ychar);
