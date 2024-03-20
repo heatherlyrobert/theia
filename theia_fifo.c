@@ -16,8 +16,8 @@ FIFO_by_stack           (char a_stack)
       return rce;
    }
    for (i = 0; i < g_nrun; ++i) {
-      DEBUG_PROG   yLOG_sint    (g_runs [i].stack);
-      if (g_runs [i].stack != a_stack)  continue;
+      DEBUG_PROG   yLOG_sint    (g_runs [i].r_stack);
+      if (g_runs [i].r_stack != a_stack)  continue;
       DEBUG_PROG   yLOG_snote   ("FOUND");
       DEBUG_PROG   yLOG_sexit   (__FUNCTION__);
       return i;
@@ -55,7 +55,7 @@ FIFO__current           (cchar a_hex [LEN_LABEL])
    ystrl2hex (a_hex, &v, LEN_LABEL);
    DEBUG_PROG   yLOG_value   ("v"         , v);
    /*---(get new current)----------------*/
-   o =  RUN_by_ref (v);
+   o =  RUN_by_winid (v);
    DEBUG_PROG   yLOG_value   ("o"         , o);
    --rce;  if (o < 0) {
       DEBUG_PROG   yLOG_note    ("can not find");
@@ -63,8 +63,8 @@ FIFO__current           (cchar a_hex [LEN_LABEL])
       return rce;
    }
    /*---(prepare for run)----------------*/
-   s =  g_runs [o].stack;
-   if (g_runs [o].stack == g_nrun - 1)  {
+   s =  g_runs [o].r_stack;
+   if (g_runs [o].r_stack == g_nrun - 1)  {
       DEBUG_PROG   yLOG_note    ("already top");
       DEBUG_PROG   yLOG_exit    (__FUNCTION__);
       return 1;
@@ -74,10 +74,10 @@ FIFO__current           (cchar a_hex [LEN_LABEL])
       DEBUG_PROG   yLOG_value   ("i"         , i);
       n = FIFO_by_stack (i);
       DEBUG_PROG   yLOG_value   ("n"         , n);
-      if (n >= 0)  g_runs [n].stack = i - 1;
+      if (n >= 0)  g_runs [n].r_stack = i - 1;
    }
    /*---(place at top)-------------------*/
-   g_runs [o].stack = g_nrun - 1;
+   g_runs [o].r_stack = g_nrun - 1;
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;

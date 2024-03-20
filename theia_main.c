@@ -51,15 +51,16 @@ main               (int a_argc, char *a_argv [])
    case  '!' : REPORT_quarter (my.fore_act);      break;
    case  'p' : PAGE_single ();                    break;
    case  'P' : PAGE_multi  ();                    break;
+   case  'b' : BACK_report (stdout);              break;
    }
    if (strcmp (my.shortcut, "") != 0) {
       DEBUG_PROG   yLOG_note     ("running a goto");
       DEBUG_PROG   yLOG_info     ("shortcut"  , my.shortcut);
-      n = RUN_by_shortcut (my.shortcut);
+      n = RUN_by_terse (my.shortcut);
       DEBUG_PROG   yLOG_value    ("n"         , n);
       if (n >= 0) {
-         DEBUG_PROG   yLOG_value    ("ref"       , g_runs [n].ref);
-         rc = yX11_win_goto (g_runs [n].ref);
+         DEBUG_PROG   yLOG_value    ("r_winid"   , g_runs [n].r_winid);
+         rc = yX11_win_goto (g_runs [n].r_winid);
          DEBUG_PROG   yLOG_value    ("goto"       , rc);
       }
    }
@@ -127,18 +128,18 @@ main_OLD           (int a_argc, char *a_argv [])
    /*---(set environment)----------------*/
    if (my.report == 'x' && g_cback   >  0)  {
       printf ("export theia_tint=\"%2.2s § %-6.6s § %-12.12s § %-7.7s § %9d §\";\n",
-            g_backs [g_cback].refno, g_backs [g_cback].terse, g_backs [g_cback].name,
-            g_backs [g_cback].hex, g_backs [g_cback].value);
+            g_backs [g_cback].b_abbr, g_backs [g_cback].b_terse, g_backs [g_cback].b_name,
+            g_backs [g_cback].b_hex , g_backs [g_cback].b_value);
       /*> printf ("export theia_1_abbr=%c;\n" , g_backs [g_cback].key);                  <* 
        *> printf ("export theia_2_color=%s\n", g_backs [g_cback].color);                 <* 
-       *> printf ("export theia_3_hex=%06x;\n", g_backs [g_cback].hex);                  <*/
+       *> printf ("export theia_3_hex=%06x;\n", g_backs [g_cback].b_hex);                  <*/
    }
    if (my.report == 'x' && my.theme  > 0)  {
       printf ("export theia_text=\"%c § %-2.2s § %-16.16s §\";\n",
-            g_fores [my.theme].style, g_fores [my.theme].refno , g_fores [my.theme].name);
-      /*> printf ("export theia_5_ref=%s;¦"  , g_fores [my.theme].refno);              <* 
-       *> printf ("export theia_6_name=%s;¦" , g_fores [my.theme].name);               <* 
-       *> printf ("export theia_7_style=%c;¦", g_fores [my.theme].style);              <*/
+            g_fores [my.theme].f_style, g_fores [my.theme].f_abbr , g_fores [my.theme].f_name);
+      /*> printf ("export theia_5_ref=%s;¦"  , g_fores [my.theme].f_abbr);              <* 
+       *> printf ("export theia_6_name=%s;¦" , g_fores [my.theme].f_name);               <* 
+       *> printf ("export theia_7_style=%c;¦", g_fores [my.theme].f_style);              <*/
    }
    if (my.report == 'x')  return 0;
    /*---(set back)-----------------------*/

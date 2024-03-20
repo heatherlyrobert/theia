@@ -12,7 +12,7 @@
 #define     P_PRONOUCE  "thee·uh yur·ee·fray·shee·uh"
 #define     P_HERITAGE  "goddess of sight and the light of the clear blue sky"
 #define     P_BRIEFLY   "light of the clear blue sky"
-#define     P_IMAGERY   ""
+#define     P_IMAGERY   "glittering woman, mother of helios (sun), selene (moon), and eos (dawn)"
 #define     P_REASON    "the goddess of light and sky makes my environment beautiful"
 /*········· ··········· ´·····························´········································*/
 #define     P_ONELINE   P_NAMESAKE " " P_SUBJECT
@@ -38,8 +38,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "1.--, running every day in production"
 #define     P_VERMINOR  "1.0-, changed from hack to maintainable program."
-#define     P_VERNUM    "1.0e"
-#define     P_VERTXT    "slighly cleaned up after new system install"
+#define     P_VERNUM    "1.0f"
+#define     P_VERTXT    "overhaul to be more dependable and unit tested color changes in eterm"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -157,11 +157,11 @@
 
 typedef     struct cFORE    tFORE;
 struct cFORE {
-   char        refno       [LEN_TERSE];
-   char        name        [LEN_LABEL];
-   char        style;
-   int         hex         [MAX_ENTRIES][LEN_TERSE];
-   int         value       [MAX_ENTRIES];
+   char        f_abbr      [LEN_TERSE];
+   char        f_name      [LEN_LABEL];
+   char        f_style;
+   int         f_hex       [MAX_ENTRIES][LEN_TERSE];
+   int         f_value     [MAX_ENTRIES];
 };
 extern tFORE  g_fores     [MAX_FORE];
 extern int    g_nfore;
@@ -172,11 +172,11 @@ extern int    g_cfore;
 #define     MAX_BACK         200
 typedef     struct cBACK     tBACK;
 struct cBACK {
-   char        refno       [LEN_TERSE];
-   char        terse       [LEN_TERSE];
-   char        name        [LEN_LABEL];
-   char        hex         [LEN_TERSE];
-   int         value;
+   char        b_abbr      [LEN_TERSE];
+   char        b_terse     [LEN_TERSE];
+   char        b_name      [LEN_LABEL];
+   char        b_hex       [LEN_TERSE];
+   int         b_value;
 };
 extern tBACK  g_backs     [MAX_BACK];
 extern int    g_nback;
@@ -191,30 +191,31 @@ typedef     struct cRUN  tRUN;
 
 struct cRUN {
    /*---(eterm specific)----*/
-   short       eterm;                       /* owning eterm                   */
-   char        back        [LEN_TERSE];     /* background terse name          */
-   char        fore        [LEN_TERSE];     /* foreground refno               */
+   short       r_eterm;                     /* owning eterm                   */
+   char        r_back      [LEN_TERSE];     /* background terse name          */
+   char        r_fore      [LEN_TERSE];     /* foreground refno               */
    /*---(window)------------*/
-   char        hex         [LEN_LABEL];
-   long        ref;                         /* window reference number        */
-   char        stack;                       /* window stacking order          */
-   char        desk;                        /* which desktop                  */
-   char        title       [LEN_HUND];      /* current window title           */
-   char        type;                        /* window use based on title      */
-   char        shortcut    [LEN_LABEL];
+   char        r_hex       [LEN_LABEL];
+   long        r_winid;                     /* window reference number        */
+   char        r_stack;                     /* window stacking order          */
+   char        r_desk;                      /* which desktop                  */
+   char        r_title     [LEN_HUND];      /* current window title           */
+   char        r_type;                      /* window use based on title      */
+   char        r_terse     [LEN_LABEL];
+   char        r_hint      [LEN_SHORT];     /* two-letter hint code           */
    /*---(position)----------*/
-   short       left;
-   short       topp;
-   short       wide;
-   short       tall;
-   char        size;
-   char        scrn;
-   char        locn;
+   short       r_left;
+   short       r_topp;
+   short       r_wide;
+   short       r_tall;
+   char        r_size;
+   char        r_scrn;
+   char        r_locn;
    /*---(running)-----------*/
-   short       use;
-   char        pubname     [LEN_LABEL];
-   char        cmdline     [LEN_RECD];
-   char        order;
+   short       r_use;
+   char        r_pubname   [LEN_LABEL];
+   char        r_cmdline   [LEN_RECD];
+   char        r_order;
    /*---(done)--------------*/
 };
 extern tRUN   g_runs    [MAX_RUN];
@@ -279,6 +280,7 @@ char        PROG_dusk               (void);
 char        PROG__end               (void);
 char        PROG_shutdown           (void);
 /*---(testing)--------------*/
+char*       PROG__unit_title        (void);
 char        PROG__unit_quiet        (void);
 char        PROG__unit_loud         (void);
 char        PROG__unit_end          (void);
@@ -289,16 +291,18 @@ char        CONF_read               (void);
 
 /*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
 char        BACK_purge              (void);
-char        BACK_by_ref             (cchar a_ref  [LEN_TERSE]);
-char        BACK_create             (cchar a_recd [LEN_RECD]);
-char        BACK_set                (cchar a_ref [LEN_TERSE]);
+char        BACK_by_abbr            (cchar a_abbr [LEN_TERSE]);
+char        BACK_handler            (cchar a_recd [LEN_RECD]);
+char        BACK_set                (cchar a_abbr [LEN_TERSE]);
+char        BACK_report             (FILE *f);
+char        BACK__unit_force        (char a_abbr [LEN_TERSE], char a_terse [LEN_TERSE], char a_name [LEN_LABEL], char a_hex [LEN_TERSE]);
 char*       BACK__unit              (char *a_question, int n);
 
 
 char        FORE_purge              (void);
-char        FORE_by_ref             (cchar a_ref  [LEN_TERSE]);
+char        FORE_by_abbr            (cchar a_abbr  [LEN_TERSE]);
 char        FORE_create             (cchar a_recd [LEN_RECD]);
-char        FORE_set                (cchar a_ref  [LEN_TERSE]);
+char        FORE_set                (cchar a_abbr  [LEN_TERSE]);
 char*       FORE__unit              (char *a_question, int n);
 
 
@@ -308,10 +312,11 @@ char*       FORE__unit              (char *a_question, int n);
 char        RUN_purge               (void);
 /*---(search)---------------*/
 char        RUN_by_eterm            (short a_eterm);
-char        RUN_by_ref              (long a_ref);
-char        RUN_by_shortcut         (cchar a_shortcut [LEN_LABEL]);
+char        RUN_by_winid            (long a_winid);
+char        RUN_by_terse            (cchar a_terse [LEN_LABEL]);
+char        RUN_by_hint             (cchar a_hint [LEN_TERSE]);
 /*---(create)---------------*/
-char        RUN__create             (cchar a_match, cchar a_recd [LEN_RECD]);
+char        RUN_handler             (cchar a_match, cchar a_recd [LEN_RECD]);
 /*---(exim)-----------------*/
 char        RUN__add_eterm          (short a_rpid, cchar a_pubname [LEN_LABEL], cchar a_cmdline [LEN_RECD], cchar a_state, short a_ppid);
 char        RUN__read               (char a_unit, cchar a_name [LEN_PATH]);
@@ -320,6 +325,7 @@ char        RUN__classify           (cchar a_title [LEN_HUND], cchar a_pubname [
 char        RUN_gather              (void);
 char        RUN_write               (cchar a_name [LEN_PATH]);
 /*---(unittest)-------------*/
+char        RUN__unit_force         (short a_eterm, char a_hint [LEN_SHORT], char a_back [LEN_TERSE], char a_fore [LEN_TERSE], char a_hex [LEN_TERSE], char a_terse [LEN_LABEL]);
 char*       RUN__unit               (char *a_question, int n);
 /*---(done)-----------------*/
 

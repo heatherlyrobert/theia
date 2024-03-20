@@ -47,11 +47,11 @@ RPTG__single            (char n, char a_fg, char a_bg, char a_style)
    if      (a_bg >=  8) { printf ("\e[5;4%dm"  , a_bg - 8);               }
    else if (a_bg >=  0) { printf ("\e[4%dm"    , a_bg);                   }
    /*---(prepare hex)--------------------*/
-   sprintf (s, "%-6.6x", g_fores [n].hex [a_fg]);
-   sprintf (t, "%-6.6x", g_fores [n].hex [a_bg]);
+   sprintf (s, "%-6.6x", g_fores [n].f_hex [a_fg]);
+   sprintf (t, "%-6.6x", g_fores [n].f_hex [a_bg]);
    switch (a_style) {
    case 1 :
-      switch (g_fores [n].style) {
+      switch (g_fores [n].f_style) {
       case 'a'  :  printf (" %-5.5s ", artistic [a_fg]);  break;
       case 'm'  :  printf (" %-5.5s ", mega_txt [a_fg]);  break;
       case 'f'  :  printf (" %-5.5s ", full_txt [a_fg]);  break;
@@ -81,7 +81,7 @@ char
 RPTG__layout       (char n, char a_fg, char a_type)
 {
    char        b           =    7;
-   char        s           = g_fores [n].style;
+   char        s           = g_fores [n].f_style;
    switch (s) {
    case 'a'  :  b = 7;  break;
    case 'm'  :  b = 7;  break;
@@ -89,7 +89,7 @@ RPTG__layout       (char n, char a_fg, char a_type)
    case 'c'  :  b = 6;  break;
    default   :  b = 7;  break;
    }
-   /*> if (g_fores [n].style != 'c') {                                           <*/
+   /*> if (g_fores [n].f_style != 'c') {                                           <*/
    printf (" ");
    RPTG__single (n, a_fg +  8, -1      , a_type);
    if (s == 'c') {
@@ -180,17 +180,24 @@ RPTG__layout       (char n, char a_fg, char a_type)
 char         /*--> show a narrow display of the scheme ---[ ------ [ ------ ]-*/
 REPORT_quarter     (char *a_refno)
 {
+   char        rce         =  -10;
    char        n           =    0;
    char        i           =    0;
    char        x_fg        =    0;
    DEBUG_PROG  yLOG_enter   (__FUNCTION__);
-   n = FORE_by_ref (a_refno);
-   if (n < 0)  return 0;
+   DEBUG_PROG  yLOG_info    ("a_refno"   , a_refno);
+   n = FORE_by_abbr (a_refno);
+   DEBUG_PROG  yLOG_value   ("n"         , n);
+   if (n < 0)  n = 0;
+   --rce;  if (n < 0) {
+      DEBUG_PROG  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    printf ("theia-euryphaessa (wide-shinning) terminal configuration for ansi 16-color terms\n");
-   printf ("assortment of consistently nice contrasts           scheme [%s/%c] %s\n", g_fores  [n].refno, g_fores [n].style, g_fores [n].name);
+   printf ("assortment of consistently nice contrasts           scheme [%s/%c] %s\n", g_fores  [n].f_abbr, g_fores [n].f_style, g_fores [n].f_name);
    printf ("\n");
    for (i = 0;  i < 8; ++i) {
-      switch (g_fores [n].style) {
+      switch (g_fores [n].f_style) {
       case 'a'  :  x_fg = arti_ord [i];  break;
       case 'm'  :  x_fg = mega_ord [i];  break;
       case 'f'  :  x_fg = full_ord [i];  break;
@@ -202,7 +209,7 @@ REPORT_quarter     (char *a_refno)
       RPTG__layout (n, x_fg, 0);
       printf ("\n");
    }
-   printf ("theia --quarter is my test for color schemes; perform here or i toss it\n");
+   printf ("theia --quarter is my test for color schemes; it performs here or i toss it\n");
    DEBUG_PROG  yLOG_exit    (__FUNCTION__);
    return 0;
 }

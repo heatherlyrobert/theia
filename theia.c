@@ -291,7 +291,7 @@ THEME_find         (char *a_ref)
    /*---(find scheme)--------------------*/
    my.theme  = 0;
    for (i = 0; i < g_nfore; ++i) {
-      if (strcmp (g_fores [i].refno, a_ref) != 0)  continue;
+      if (strcmp (g_fores [i].f_abbr, a_ref) != 0)  continue;
       my.theme  = i;
       break;
    }
@@ -337,9 +337,9 @@ THEME_set          (void)
       if (j >=  2) {
          x = ((int) j / 2) - 1 + ((j % 2) *  8);
          y = ((int) j / 2) - 1 + ((j % 2) * 10) + 30;
-         sprintf (x_str, "包P%1x%06x", x, g_fores [my.theme].hex [j]);
-         DEBUG_GRAF  yLOG_complex ("color"     , "%2d, %2d, %8d, %6x, %s", j, y, g_fores [my.theme].hex [j], g_fores [my.theme].hex [j], x_str);
-         printf ("包P%1x%06x", x, g_fores [my.theme].hex [j]);
+         sprintf (x_str, "包P%1x%06x", x, g_fores [my.theme].f_hex [j]);
+         DEBUG_GRAF  yLOG_complex ("color"     , "%2d, %2d, %8d, %6x, %s", j, y, g_fores [my.theme].f_hex [j], g_fores [my.theme].f_hex [j], x_str);
+         printf ("包P%1x%06x", x, g_fores [my.theme].f_hex [j]);
       }
    }
    /*---(find eterm or hestia)-----------*/
@@ -351,7 +351,7 @@ THEME_set          (void)
       /*> if (x_ppid != g_runs [j].ppid)  continue;                                   <* 
        *> g_runs [j].when      = x_now;                                               <* 
        *> strcpy (g_runs [j].theme_ref, my.fore);                                   <* 
-       *> strcpy (g_runs [j].theme_name, g_fores [my.theme].name);                    <*/
+       *> strcpy (g_runs [j].theme_name, g_fores [my.theme].f_name);                    <*/
       break;
    }
    if (j == g_nrun) {
@@ -361,7 +361,7 @@ THEME_set          (void)
        *> strcpy (g_runs [j].back_name , "------");                                   <* 
        *> g_runs [j].back_hex  = 0;                                                   <* 
        *> strcpy (g_runs [j].theme_ref, my.fore);                                   <* 
-       *> strcpy (g_runs [j].theme_name, g_fores [my.theme].name);                    <* 
+       *> strcpy (g_runs [j].theme_name, g_fores [my.theme].f_name);                    <* 
        *> ++g_nrun;                                                                   <*/
    }
    /*---(complete)-----------------------*/
@@ -600,7 +600,7 @@ REPORT_wide        (int  a_scheme)
    /*---(overall title)------------------*/
    printf ("\n");
    printf ("heatherly terminal font color matrix (ansi 16 color, 12-bit)");
-   snprintf (t, 60, "scheme [%s] %s", g_fores  [my.theme].refno, g_fores  [my.theme].name);
+   snprintf (t, 60, "scheme [%s] %s", g_fores  [my.theme].f_abbr, g_fores  [my.theme].f_name);
    printf ("%160.160s\n", t);
    printf ("\n");
    /*---(column titles)------------------*/
@@ -642,13 +642,13 @@ REPORT_wide        (int  a_scheme)
          }
          printf ("  ");
          if (battr == 0) {
-            printf ("加5;3%d;4%dm   %06x   加0m ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
+            printf ("加5;3%d;4%dm   %06x   加0m ", findex, findex, g_fores  [my.theme].f_hex [fcolor * 2 + 0    ]);
             printf ("  ");
-            printf ("加1;3%d;4%dm   %06x   加0m ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
+            printf ("加1;3%d;4%dm   %06x   加0m ", findex, findex, g_fores  [my.theme].f_hex [fcolor * 2 + 1    ]);
          } else {
-            printf ("加1;3%d;4%dm   %06x   加0m ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
+            printf ("加1;3%d;4%dm   %06x   加0m ", findex, findex, g_fores  [my.theme].f_hex [fcolor * 2 + 1    ]);
             printf ("  ");
-            printf ("加5;3%d;4%dm   %06x   加0m ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
+            printf ("加5;3%d;4%dm   %06x   加0m ", findex, findex, g_fores  [my.theme].f_hex [fcolor * 2 + 0    ]);
          }
          printf ("\n");
       }
@@ -669,7 +669,7 @@ REPORT_single_OLD   (char a_fg, char a_bg, char a_style)
    if      (a_bg >=  8) { printf ("\e[5;4%dm"  , a_bg - 8);               }
    else if (a_bg >=  0) { printf ("\e[4%dm"    , a_bg);                   }
    if (a_style == 1) {
-      switch (g_fores [my.theme].style) {
+      switch (g_fores [my.theme].f_style) {
       case 'a'  :  printf (" %-5.5s ", artistic [a_fg]);  break;
       case 'm'  :  printf (" %-5.5s ", mega_txt [a_fg]);  break;
       case 'f'  :  printf (" %-5.5s ", full_txt [a_fg]);  break;
@@ -696,11 +696,11 @@ REPORT_single       (char a_fg, char a_bg, char a_style)
    if      (a_bg >=  8) { printf ("\e[5;4%dm"  , a_bg - 8);               }
    else if (a_bg >=  0) { printf ("\e[4%dm"    , a_bg);                   }
    /*---(prepare hex)--------------------*/
-   sprintf (s, "%-6.6x", g_fores [my.theme].hex [a_fg]);
-   sprintf (t, "%-6.6x", g_fores [my.theme].hex [a_bg]);
+   sprintf (s, "%-6.6x", g_fores [my.theme].f_hex [a_fg]);
+   sprintf (t, "%-6.6x", g_fores [my.theme].f_hex [a_bg]);
    switch (a_style) {
    case 1 :
-      switch (g_fores [my.theme].style) {
+      switch (g_fores [my.theme].f_style) {
       case 'a'  :  printf (" %-5.5s ", artistic [a_fg]);  break;
       case 'm'  :  printf (" %-5.5s ", mega_txt [a_fg]);  break;
       case 'f'  :  printf (" %-5.5s ", full_txt [a_fg]);  break;
@@ -730,7 +730,7 @@ char
 REPORT_layout      (char a_fg, char a_style)
 {
    char        b           =    7;
-   char        s           = g_fores [my.theme].style;
+   char        s           = g_fores [my.theme].f_style;
    switch (s) {
    case 'a'  :  b = 7;  break;
    case 'm'  :  b = 7;  break;
@@ -738,7 +738,7 @@ REPORT_layout      (char a_fg, char a_style)
    case 'c'  :  b = 6;  break;
    default   :  b = 7;  break;
    }
-   /*> if (g_fores [my.theme].style != 'c') {                                           <*/
+   /*> if (g_fores [my.theme].f_style != 'c') {                                           <*/
    printf (" ");
    REPORT_single (a_fg +  8, -1      , a_style);
    if (s == 'c') {
@@ -838,7 +838,7 @@ REPORT_narrow      (int  a_scheme)
    /*---(overall title)------------------*/
    printf ("\n");
    printf ("heatherly terminal font color matrix (ansi 16 color, 12-bit)");
-   snprintf (t, 60, "scheme [%s] %s", g_fores  [my.theme].refno, g_fores  [my.theme].name);
+   snprintf (t, 60, "scheme [%s] %s", g_fores  [my.theme].f_abbr, g_fores  [my.theme].f_name);
    printf ("%76.76s\n", t);
    printf ("\n");
    /*---(column titles)------------------*/
@@ -867,36 +867,36 @@ REPORT_narrow      (int  a_scheme)
          printf ("  ");
          if (battr == 0) {
             /*---(clear back)------------*/
-            printf ("加5;3%d;4%dm   %06x   加0m   ", findex, 9     , g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
-            printf ("加1;3%d;4%dm   %06x   加0m   ", findex, 9     , g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
+            printf ("加5;3%d;4%dm   %06x   加0m   ", findex, 9     , g_fores  [my.theme].f_hex [fcolor * 2 + 0    ]);
+            printf ("加1;3%d;4%dm   %06x   加0m   ", findex, 9     , g_fores  [my.theme].f_hex [fcolor * 2 + 1    ]);
             printf ("  ");
             /*---(same color swap)-------*/
-            printf ("加5;3%d;4%dm   %06x   加0m   ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
-            printf ("加1;3%d;4%dm   %06x   加0m   ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
+            printf ("加5;3%d;4%dm   %06x   加0m   ", findex, findex, g_fores  [my.theme].f_hex [fcolor * 2 + 0    ]);
+            printf ("加1;3%d;4%dm   %06x   加0m   ", findex, findex, g_fores  [my.theme].f_hex [fcolor * 2 + 1    ]);
             printf ("  ");
             /*---(black/white fore)------*/
-            printf ("加5;3%d;4%dm   %06x   加0m   ", 0     , findex, g_fores  [my.theme].hex [1      * 2 + 0    ]);
-            printf ("加1;3%d;4%dm   %06x   加0m   ", findex, 0     , g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
+            printf ("加5;3%d;4%dm   %06x   加0m   ", 0     , findex, g_fores  [my.theme].f_hex [1      * 2 + 0    ]);
+            printf ("加1;3%d;4%dm   %06x   加0m   ", findex, 0     , g_fores  [my.theme].f_hex [fcolor * 2 + 1    ]);
             printf ("  ");
             /*---(black/white back)------*/
-            printf ("加5;3%d;4%dm   %06x   加0m   ", findex, 7     , g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
-            printf ("加1;3%d;4%dm   %06x   加0m   ", 7     , findex, g_fores  [my.theme].hex [8      * 2 + 1    ]);
+            printf ("加5;3%d;4%dm   %06x   加0m   ", findex, 7     , g_fores  [my.theme].f_hex [fcolor * 2 + 0    ]);
+            printf ("加1;3%d;4%dm   %06x   加0m   ", 7     , findex, g_fores  [my.theme].f_hex [8      * 2 + 1    ]);
          } else {
             /*---(clear back)------------*/
-            printf ("加1;3%d;4%dm   %06x   加0m   ", findex, 9     , g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
-            printf ("加5;3%d;4%dm   %06x   加0m   ", findex, 9     , g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
+            printf ("加1;3%d;4%dm   %06x   加0m   ", findex, 9     , g_fores  [my.theme].f_hex [fcolor * 2 + 1    ]);
+            printf ("加5;3%d;4%dm   %06x   加0m   ", findex, 9     , g_fores  [my.theme].f_hex [fcolor * 2 + 0    ]);
             printf ("  ");
             /*---(same color swap)-------*/
-            printf ("加1;3%d;4%dm   %06x   加0m   ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
-            printf ("加5;3%d;4%dm   %06x   加0m   ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
+            printf ("加1;3%d;4%dm   %06x   加0m   ", findex, findex, g_fores  [my.theme].f_hex [fcolor * 2 + 1    ]);
+            printf ("加5;3%d;4%dm   %06x   加0m   ", findex, findex, g_fores  [my.theme].f_hex [fcolor * 2 + 0    ]);
             printf ("  ");
             /*---(black/white fore)------*/
-            printf ("加1;3%d;4%dm   %06x   加0m   ", findex, 0     , g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
-            printf ("加5;3%d;4%dm   %06x   加0m   ", 0     , findex, g_fores  [my.theme].hex [1      * 2 + 0    ]);
+            printf ("加1;3%d;4%dm   %06x   加0m   ", findex, 0     , g_fores  [my.theme].f_hex [fcolor * 2 + 1    ]);
+            printf ("加5;3%d;4%dm   %06x   加0m   ", 0     , findex, g_fores  [my.theme].f_hex [1      * 2 + 0    ]);
             printf ("  ");
             /*---(black/white back)------*/
-            printf ("加1;3%d;4%dm   %06x   加0m   ", 7     , findex, g_fores  [my.theme].hex [8      * 2 + 1    ]);
-            printf ("加5;3%d;4%dm   %06x   加0m   ", findex, 7     , g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
+            printf ("加1;3%d;4%dm   %06x   加0m   ", 7     , findex, g_fores  [my.theme].f_hex [8      * 2 + 1    ]);
+            printf ("加5;3%d;4%dm   %06x   加0m   ", findex, 7     , g_fores  [my.theme].f_hex [fcolor * 2 + 0    ]);
          }
          printf ("\n");
       }
@@ -922,7 +922,7 @@ REPORT_tiny        (int  a_scheme)
    /*---(overall title)------------------*/
    printf ("\n");
    printf ("theia, the heatherly terminal configuration system for ansi 16 x 12-bit color setups\n");
-   snprintf (t, 60, "scheme [%s] %s", g_fores  [my.theme].refno, g_fores  [my.theme].name);
+   snprintf (t, 60, "scheme [%s] %s", g_fores  [my.theme].f_abbr, g_fores  [my.theme].f_name);
    printf ("%s : %-47.47s%30.30s\n", P_VERNUM, P_VERTXT, t);
    /*---(cycle colors)-------------------*/
    for (fcolor = 1; fcolor < MAX_COLOR; ++fcolor) {
@@ -934,36 +934,36 @@ REPORT_tiny        (int  a_scheme)
       for (battr = 0; battr <= 5; battr += 5) {
          if (battr == 0) {
             /*---(clear back)------------*/
-            printf ("加5;3%d;4%dm %06x 加0m"   , findex, 9     , g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
-            printf ("加1;3%d;4%dm %06x 加0m"   , findex, 9     , g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
+            printf ("加5;3%d;4%dm %06x 加0m"   , findex, 9     , g_fores  [my.theme].f_hex [fcolor * 2 + 0    ]);
+            printf ("加1;3%d;4%dm %06x 加0m"   , findex, 9     , g_fores  [my.theme].f_hex [fcolor * 2 + 1    ]);
             printf (" ");
             /*---(same color swap)-------*/
-            printf ("加5;3%d;4%dm  %06x  加0m ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
-            printf ("加1;3%d;4%dm  %06x  加0m ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
+            printf ("加5;3%d;4%dm  %06x  加0m ", findex, findex, g_fores  [my.theme].f_hex [fcolor * 2 + 0    ]);
+            printf ("加1;3%d;4%dm  %06x  加0m ", findex, findex, g_fores  [my.theme].f_hex [fcolor * 2 + 1    ]);
             printf (" ");
             /*---(black/white fore)------*/
-            printf ("加5;3%d;4%dm  %06x  加0m ", 0     , findex, g_fores  [my.theme].hex [1      * 2 + 0    ]);
-            printf ("加1;3%d;4%dm  %06x  加0m ", findex, 0     , g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
+            printf ("加5;3%d;4%dm  %06x  加0m ", 0     , findex, g_fores  [my.theme].f_hex [1      * 2 + 0    ]);
+            printf ("加1;3%d;4%dm  %06x  加0m ", findex, 0     , g_fores  [my.theme].f_hex [fcolor * 2 + 1    ]);
             printf (" ");
             /*---(black/white back)------*/
-            printf ("加5;3%d;4%dm  %06x  加0m ", findex, 7     , g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
-            printf ("加1;3%d;4%dm  %06x  加0m ", 7     , findex, g_fores  [my.theme].hex [8      * 2 + 1    ]);
+            printf ("加5;3%d;4%dm  %06x  加0m ", findex, 7     , g_fores  [my.theme].f_hex [fcolor * 2 + 0    ]);
+            printf ("加1;3%d;4%dm  %06x  加0m ", 7     , findex, g_fores  [my.theme].f_hex [8      * 2 + 1    ]);
          } else {
             /*---(clear back)------------*/
-            printf ("加1;3%d;4%dm %06x 加0m"   , findex, 9     , g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
-            printf ("加5;3%d;4%dm %06x 加0m"   , findex, 9     , g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
+            printf ("加1;3%d;4%dm %06x 加0m"   , findex, 9     , g_fores  [my.theme].f_hex [fcolor * 2 + 1    ]);
+            printf ("加5;3%d;4%dm %06x 加0m"   , findex, 9     , g_fores  [my.theme].f_hex [fcolor * 2 + 0    ]);
             printf (" ");
             /*---(same color swap)-------*/
-            printf ("加1;3%d;4%dm  %06x  加0m ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
-            printf ("加5;3%d;4%dm  %06x  加0m ", findex, findex, g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
+            printf ("加1;3%d;4%dm  %06x  加0m ", findex, findex, g_fores  [my.theme].f_hex [fcolor * 2 + 1    ]);
+            printf ("加5;3%d;4%dm  %06x  加0m ", findex, findex, g_fores  [my.theme].f_hex [fcolor * 2 + 0    ]);
             printf (" ");
             /*---(black/white fore)------*/
-            printf ("加1;3%d;4%dm  %06x  加0m ", findex, 0     , g_fores  [my.theme].hex [fcolor * 2 + 1    ]);
-            printf ("加5;3%d;4%dm  %06x  加0m ", 0     , findex, g_fores  [my.theme].hex [1      * 2 + 0    ]);
+            printf ("加1;3%d;4%dm  %06x  加0m ", findex, 0     , g_fores  [my.theme].f_hex [fcolor * 2 + 1    ]);
+            printf ("加5;3%d;4%dm  %06x  加0m ", 0     , findex, g_fores  [my.theme].f_hex [1      * 2 + 0    ]);
             printf (" ");
             /*---(black/white back)------*/
-            printf ("加1;3%d;4%dm  %06x  加0m ", 7     , findex, g_fores  [my.theme].hex [8      * 2 + 1    ]);
-            printf ("加5;3%d;4%dm  %06x  加0m ", findex, 7     , g_fores  [my.theme].hex [fcolor * 2 + 0    ]);
+            printf ("加1;3%d;4%dm  %06x  加0m ", 7     , findex, g_fores  [my.theme].f_hex [8      * 2 + 1    ]);
+            printf ("加5;3%d;4%dm  %06x  加0m ", findex, 7     , g_fores  [my.theme].f_hex [fcolor * 2 + 0    ]);
          }
          printf ("\n");
       }
@@ -980,16 +980,16 @@ REPORT_line        (char a_line, char a_bg)
    int         u           = 0xf8f8f8;
    int         v           = 0xf8f8f8;
    int         i           =    0;
-   u = g_fores [my.theme].hex [(a_bg + 1) * 2 + 0];
-   v = g_fores [my.theme].hex [(a_bg + 1) * 2 + 1];
+   u = g_fores [my.theme].f_hex [(a_bg + 1) * 2 + 0];
+   v = g_fores [my.theme].f_hex [(a_bg + 1) * 2 + 1];
    if (a_line == 1) {
       printf ("\n");
       printf ("\e[3%dm%06x - %-8.8s (%c)\e[0m\n", a_bg, u, cname [a_bg], abbr [a_bg]);
    }
    printf ("  ");
    for (i = 0; i < 8; ++i) {
-      s = g_fores  [my.theme].hex [(i + 1) * 2 + 0];
-      t = g_fores  [my.theme].hex [(i + 1) * 2 + 1];
+      s = g_fores  [my.theme].f_hex [(i + 1) * 2 + 0];
+      t = g_fores  [my.theme].f_hex [(i + 1) * 2 + 1];
       switch (a_line) {
       case 1 : case 3 :
          printf ("\e[3%d;4%dm            \e[0m "  , i, a_bg);
@@ -1026,8 +1026,8 @@ REPORT_line2       (char a_line, char a_bg)
    int         v           = 0xf8f8f8;
    int         i           =    0;
    int         f, b;
-   u = g_fores [my.theme].hex [(a_bg + 1) * 2 + 0];
-   v = g_fores [my.theme].hex [(a_bg + 1) * 2 + 1];
+   u = g_fores [my.theme].f_hex [(a_bg + 1) * 2 + 0];
+   v = g_fores [my.theme].f_hex [(a_bg + 1) * 2 + 1];
    if (a_line == 1) {
       printf ("\n");
       printf ("\e[3%dm%06x - %-8.8s (%c)\e[0m\n", a_bg, u, cname [a_bg], abbr [a_bg]);
@@ -1035,8 +1035,8 @@ REPORT_line2       (char a_line, char a_bg)
    printf ("  ");
    for (i = 0; i < 11; ++i) {
       if (i < 8) {
-         s = g_fores  [my.theme].hex [(i + 1) * 2 + 0];
-         t = g_fores  [my.theme].hex [(i + 1) * 2 + 1];
+         s = g_fores  [my.theme].f_hex [(i + 1) * 2 + 0];
+         t = g_fores  [my.theme].f_hex [(i + 1) * 2 + 1];
          f = i;
          b = a_bg;
       } else if (i == 8) {
@@ -1158,7 +1158,7 @@ REPORT_every       (int  a_scheme)
    char        fprefix     [20];
    /*---(overall title)------------------*/
    printf ("\n");
-   snprintf (t, 60, "scheme [%s] %s", g_fores  [my.theme].refno, g_fores  [my.theme].name);
+   snprintf (t, 60, "scheme [%s] %s", g_fores  [my.theme].f_abbr, g_fores  [my.theme].f_name);
    printf ("%s         %s\n", P_ONELINE, t);
    /*> printf ("--every   %s : %-47.47s%30.30s\n", P_VERNUM, P_VERTXT, t);            <*/
    /*---(cycle colors)-------------------*/
@@ -1226,7 +1226,7 @@ REPORT_fullsome    (int  a_scheme)
    char        fprefix     [20];
    /*---(overall title)------------------*/
    printf ("\n");
-   snprintf (t, 60, "scheme [%s] %s", g_fores  [my.theme].refno, g_fores  [my.theme].name);
+   snprintf (t, 60, "scheme [%s] %s", g_fores  [my.theme].f_abbr, g_fores  [my.theme].f_name);
    printf ("%s         %s\n", P_ONELINE, t);
    /*> printf ("--every   %s : %-47.47s%30.30s\n", P_VERNUM, P_VERTXT, t);            <*/
    /*---(cycle colors)-------------------*/

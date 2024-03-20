@@ -1,40 +1,37 @@
-.TH s 1 2014-Jan "linux" "heatherly custom tools manual"
+.TH theia· 1 2014-Jan "linux" "end-user command-line use, and options"
 
 .SH NAME
-theia euryphaessa (wide-shinning) \- interactive terminal configurator
+.B theia
+\- interactive terminal color configurator for eterm
+
+.SH PATRON
+.B theia-euryphaessa
+(wide-shinning)
+light of the clear blue sky
+
+.SH IMAGERY
+glittering woman, mother of helios (sun), selene (moon), and eos (dawn)
+
+.SH SUMMARY
+as a c-programmer, i live in gentoo, fluxbox, and eterm.  my visual environment
+must be aesthetic and keep me focused and productive.  color is critical as
+many of my programs classify data using color-coding.
+
+.SH FOREWARNING
+i am a crazy, selfish, dog-fooding c-programmer.  i set unrealistic,
+challenging, and audacious goals to push myself; and therefore, my software
+tends to be experimental, very personalized, and constantly evolving.
+
+i never planned to share software with end-users, my intention is to expose
+my code to other programmers so we may learn from (and laugh at) each other.
+use this software at your own risk.  i take zero responsibility ;)
+
+my point is not to be the best, it is to be _my_ best.  to learn how to build
+fullsome, transparent, and maintainable software.  my designs and code may
+not be universally liked, but i hand-coded _every_ byte ;)
 
 .SH SYNOPSIS
 .B theia [URGENTS] [OPTIONS] [ARGUMENTS]
-
-.SH DESCRIPTION (short)
-theia is my configurator for terminal windows, including eterm, my primary
-coding environment.  her goal is to provide a quick method to beaufifully match
-eterm transparent background color and terminal font colors with the desktop
-environment.
-
-.SH URGENTS
-
-.B @@log
-begins logging to the standard system directory and sets @@tops.  without
-specifying @@log, no other urgents will have an effect.
-
-.B @t, @@tops
-logs program structure entering and exiting major functions
-
-.B @c, @@args
-logs processing command line arguments and urgents
-
-.B @f, @@file
-logs reading the input file theia.schemes
-
-.B @g, @@graf
-logs setting termintal font and background colors
-
-.B @o, @@outp
-logs modifying environment vars to store terminal config
-
-.B @p, @@proc
-logs the processing handling of terminal information
 
 .SH OPTIONS
 
@@ -55,13 +52,12 @@ prints a list of known terminals and settings
 
 .SH ARGUMENTS
 
-.B <c>
-single character [a-z] which is short-hand for a transparent eterm background
-color.
+.B <s>
+single/double character [a-z] which is short-hand for a transparent eterm
+background color.
 
 .B <xx>
 two digit hex id which is short-hand for a font color theme from the file
-theia.schemes.
 
 .B <xxxxxx>
 six digit hex color code which directly sets the transparent eterm background

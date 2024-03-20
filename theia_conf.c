@@ -44,7 +44,7 @@ CONF_read          (void)
       }
       /*---(address backgrounds)---------*/
       else if (strncmp (x_recd, "background ", 11) == 0) {
-         rc = BACK_create (x_recd);
+         rc = BACK_handler (x_recd);
       }
    }
    /*---(close file)---------------------*/

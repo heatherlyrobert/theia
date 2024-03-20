@@ -23,30 +23,31 @@ RUN_purge               (void)
    /*---(clear table)--------------------*/
    for (i = 0; i < MAX_RUN; ++i)  {
       /*---(eterm)----------*/
-      g_runs [i].eterm     =  0;
-      ystrlcpy (g_runs [i].back , "·", LEN_TERSE);
-      ystrlcpy (g_runs [i].fore , "·", LEN_TERSE);
+      g_runs [i].r_eterm   =  0;
+      ystrlcpy (g_runs [i].r_back , "·", LEN_TERSE);
+      ystrlcpy (g_runs [i].r_fore , "·", LEN_TERSE);
       /*---(window)---------*/
-      ystrlcpy (g_runs [i].hex  , "·", LEN_LABEL);
-      g_runs [i].ref       =  0;
-      g_runs [i].stack     = -1;
-      g_runs [i].desk      =  0;
-      ystrlcpy (g_runs [i].title, "·", LEN_HUND);
-      g_runs [i].type      = '·';
-      ystrlcpy (g_runs [i].shortcut , "·", LEN_LABEL);
+      ystrlcpy (g_runs [i].r_hex  , "·", LEN_LABEL);
+      g_runs [i].r_winid   =  0;
+      g_runs [i].r_stack   = -1;
+      g_runs [i].r_desk    =  0;
+      ystrlcpy (g_runs [i].r_title, "·", LEN_HUND);
+      g_runs [i].r_type    = '·';
+      ystrlcpy (g_runs [i].r_terse    , "·", LEN_LABEL);
+      ystrlcpy (g_runs [i].r_hint     , "·", LEN_SHORT);
       /*---(position)-------*/
-      g_runs [i].left      =  0;
-      g_runs [i].topp      =  0;
-      g_runs [i].wide      =  0;
-      g_runs [i].tall      =  0;
-      g_runs [i].size      = '·';
-      g_runs [i].scrn      = '·';
-      g_runs [i].locn      = '·';
+      g_runs [i].r_left    =  0;
+      g_runs [i].r_topp    =  0;
+      g_runs [i].r_wide    =  0;
+      g_runs [i].r_tall    =  0;
+      g_runs [i].r_size    = '·';
+      g_runs [i].r_scrn    = '·';
+      g_runs [i].r_locn    = '·';
       /*---(running)--------*/
-      g_runs [i].use       =  0;
-      ystrlcpy (g_runs [i].pubname, "·", LEN_LABEL);
-      ystrlcpy (g_runs [i].cmdline, "·", LEN_RECD);
-      g_runs [i].order     =  0;
+      g_runs [i].r_use       =  0;
+      ystrlcpy (g_runs [i].r_pubname, "·", LEN_LABEL);
+      ystrlcpy (g_runs [i].r_cmdline, "·", LEN_RECD);
+      g_runs [i].r_order     =  0;
       /*---(done)-----------*/
    }
    g_nrun  = 0;
@@ -72,7 +73,7 @@ RUN_by_eterm            (short a_eterm)
    --rce;  if (a_eterm == 0)  return rce;
    g_crun    = 0;
    for (i = 0; i < g_nrun; ++i) {
-      if (g_runs  [i].eterm != a_eterm)  continue;
+      if (g_runs  [i].r_eterm != a_eterm)  continue;
       g_crun   = i;
       return i;
    }
@@ -81,16 +82,16 @@ RUN_by_eterm            (short a_eterm)
 }
 
 char
-RUN_by_ref              (long a_ref)
+RUN_by_winid            (long a_winid)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    int         i           =    0;
    /*---(find back)----------------------*/
-   --rce;  if (a_ref   == 0)  return rce;
+   --rce;  if (a_winid   == 0)  return rce;
    g_crun    = 0;
    for (i = 0; i < g_nrun; ++i) {
-      if (g_runs  [i].ref   != a_ref)  continue;
+      if (g_runs  [i].r_winid != a_winid)  continue;
       g_crun   = i;
       return i;
    }
@@ -99,16 +100,34 @@ RUN_by_ref              (long a_ref)
 }
 
 char
-RUN_by_shortcut         (cchar a_shortcut [LEN_LABEL])
+RUN_by_terse            (cchar a_terse [LEN_LABEL])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    int         i           =    0;
    /*---(find back)----------------------*/
-   --rce;  if (a_shortcut == NULL)  return rce;
+   --rce;  if (a_terse == NULL)  return rce;
    g_crun    = 0;
    for (i = 0; i < g_nrun; ++i) {
-      if (strcmp (g_runs  [i].shortcut, a_shortcut) != 0)  continue;
+      if (strcmp (g_runs  [i].r_terse, a_terse) != 0)  continue;
+      g_crun   = i;
+      return i;
+   }
+   /*---(complete)-----------------------*/
+   return --rce;
+}
+
+char
+RUN_by_hint             (cchar a_hint [LEN_TERSE])
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   int         i           =    0;
+   /*---(find back)----------------------*/
+   --rce;  if (a_hint == NULL)  return rce;
+   g_crun    = 0;
+   for (i = 0; i < g_nrun; ++i) {
+      if (strcmp (g_runs  [i].r_hint , a_hint ) != 0)  continue;
       g_crun   = i;
       return i;
    }
@@ -124,7 +143,7 @@ RUN_by_shortcut         (cchar a_shortcut [LEN_LABEL])
 static void      o___EXISTANCE_______________o (void) {;}
 
 char
-RUN__create             (cchar a_match, cchar a_recd [LEN_RECD])
+RUN_handler             (cchar a_match, cchar a_recd [LEN_RECD])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -140,7 +159,7 @@ RUN__create             (cchar a_match, cchar a_recd [LEN_RECD])
    int         x_eterm     =    0;
    char        x_back      [LEN_TERSE] = "";
    char        x_fore      [LEN_TERSE] = "";
-   char        x_hex       [LEN_LABEL] = "";
+   char        x_hex       [LEN_LABEL] = "·";
    long        x_ref       =    0;
    char        x_stack     =   -1;
    char        x_exist     =    0;
@@ -214,7 +233,7 @@ RUN__create             (cchar a_match, cchar a_recd [LEN_RECD])
             DEBUG_CONF   yLOG_note    ("long value");
             x_ref = atoi (x_field);
          }
-         /*> if (RUN_by_ref (g_runs [n].ref) >= 0)  {                                 <* 
+         /*> if (RUN_by_winid (g_runs [n].r_winid) >= 0)  {                                 <* 
           *>    DEBUG_CONF   yLOG_note    ("reference already exists");               <* 
           *>    rc = --rce;                                                           <* 
           *>    break;                                                                <* 
@@ -243,20 +262,20 @@ RUN__create             (cchar a_match, cchar a_recd [LEN_RECD])
       return rce;
    }
    /*---(save out)--------------------*/
-   x_exist = RUN_by_ref (x_ref);
+   x_exist = RUN_by_winid (x_ref);
    if (x_exist < 0) {
-      g_runs [n].eterm = x_eterm;
-      DEBUG_CONF   yLOG_value   (".eterm"    , g_runs [n].eterm);
-      ystrlcpy  (g_runs [n].back, x_back, LEN_TERSE);
-      DEBUG_CONF   yLOG_info    (".back"     , g_runs [n].back);
-      ystrlcpy  (g_runs [n].fore, x_fore, LEN_TERSE);
-      DEBUG_CONF   yLOG_info    (".fore"     , g_runs [n].fore);
-      ystrlcpy  (g_runs [n].hex , x_hex , LEN_LABEL);
-      DEBUG_CONF   yLOG_info    (".hex"      , g_runs [n].fore);
-      g_runs [n].ref = x_ref;
-      DEBUG_CONF   yLOG_value   (".ref"      , g_runs [n].ref);
-      g_runs [n].stack = x_stack;
-      DEBUG_CONF   yLOG_value   (".stack"    , g_runs [n].stack);
+      g_runs [n].r_eterm = x_eterm;
+      DEBUG_CONF   yLOG_value   ("r_eterm"   , g_runs [n].r_eterm);
+      ystrlcpy  (g_runs [n].r_back, x_back, LEN_TERSE);
+      DEBUG_CONF   yLOG_info    ("r_back"    , g_runs [n].r_back);
+      ystrlcpy  (g_runs [n].r_fore, x_fore, LEN_TERSE);
+      DEBUG_CONF   yLOG_info    ("r_fore"    , g_runs [n].r_fore);
+      ystrlcpy  (g_runs [n].r_hex , x_hex , LEN_LABEL);
+      DEBUG_CONF   yLOG_info    ("r_hex"     , g_runs [n].r_hex);
+      g_runs [n].r_winid = x_ref;
+      DEBUG_CONF   yLOG_value   ("r_winid"   , g_runs [n].r_winid);
+      g_runs [n].r_stack = x_stack;
+      DEBUG_CONF   yLOG_value   ("r_stack"   , g_runs [n].r_stack);
    }
    /*---(advance)---------------------*/
    if (n == g_nrun)  ++g_nrun;
@@ -296,7 +315,7 @@ RUN__add_eterm          (short a_rpid, cchar a_pubname [LEN_LABEL], cchar a_cmdl
    }
    /*---(add entry)----------------------*/
    sprintf (t, "%-6d § ·      § ·  §", a_rpid);
-   rc = RUN__create ('-', t);
+   rc = RUN_handler ('-', t);
    DEBUG_CONF   yLOG_value   ("create"    , rc);
    --rce;  if (rc <  0) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
@@ -320,10 +339,12 @@ RUN__read               (char a_unit, cchar a_name [LEN_PATH])
    /*---(header)-------------------------*/
    DEBUG_FILE   yLOG_enter   (__FUNCTION__);
    /*---(purge current)------------------*/
-   rc = RUN_purge ();
-   DEBUG_FILE   yLOG_value   ("purge"     , rc);
+   if (a_unit != 'Y') {
+      rc = RUN_purge ();
+      DEBUG_FILE   yLOG_value   ("purge"     , rc);
+   }
    /*---(add all eterms)-----------------*/
-   if (a_unit != 'y') {
+   if (a_unit == '-') {
       rc = yEXEC_data_filter (0, "Eterm", 0, RUN__add_eterm);
       DEBUG_FILE   yLOG_value   ("filter"    , rc);
       --rce;  if (rc < 0)  {
@@ -331,6 +352,7 @@ RUN__read               (char a_unit, cchar a_name [LEN_PATH])
          return rce;
       }
    }
+   DEBUG_FILE   yLOG_value   ("found"     , g_nrun);
    /*---(defense)------------------------*/
    DEBUG_FILE   yLOG_point   ("a_name"    , a_name);
    --rce;  if (a_name == NULL) {
@@ -361,8 +383,8 @@ RUN__read               (char a_unit, cchar a_name [LEN_PATH])
       if (x_recd[0] == ' ')            continue;
       if (x_recd[0] == '\0')           continue;
       /*---(handle the record)-----------*/
-      if (a_unit != 'y')  rc = RUN__create ('y', x_recd);
-      else                rc = RUN__create ('-', x_recd);
+      if (a_unit != 'y')  rc = RUN_handler ('y', x_recd);
+      else                rc = RUN_handler ('-', x_recd);
       /*---(done)------------------------*/
    }
    /*---(close file)---------------------*/
@@ -489,8 +511,8 @@ RUN__stacking         (char a_unit)
     *>    DEBUG_FILE   yLOG_complex ("p"         , "%2d %2då%sæ", c, l, p);                                                      <* 
     *>    ystrl2hex (p, &v, LEN_LABEL);                                                                                           <* 
     *>    DEBUG_FILE   yLOG_value   ("v"         , v);                                                                           <* 
-    *>    n = RUN_by_ref (v);                                                                                                    <* 
-    *>    if (n >= 0)  g_runs [n].stack = c;                                                                                     <* 
+    *>    n = RUN_by_winid (v);                                                                                                    <* 
+    *>    if (n >= 0)  g_runs [n].r_stack = c;                                                                                     <* 
     *>    /+---(next)------------------------+/                                                                                  <* 
     *>    ++c;                                                                                                                   <* 
     *>    p = strtok_r (NULL, ", ", &r);                                                                                         <* 
@@ -528,37 +550,37 @@ RUN_gather            (void)
    DEBUG_FILE   yLOG_enter   (__FUNCTION__);
    /*---(using process)------------------*/
    for (i = 0; i < g_nrun; ++i) {
-      rc = yEXEC_find_eterm_use (g_runs [i].eterm, &x_lvl, &x_use, g_runs [i].pubname, g_runs [i].cmdline);
-      g_runs [i].use = x_use;
-      if (g_runs [i].ref == 0) {
-         if (g_runs [i].eterm == my.eterm)  g_runs [i].ref = my.win;
+      rc = yEXEC_find_eterm_use (g_runs [i].r_eterm, &x_lvl, &x_use, g_runs [i].r_pubname, g_runs [i].r_cmdline);
+      g_runs [i].r_use = x_use;
+      if (g_runs [i].r_winid == 0) {
+         if (g_runs [i].r_eterm == my.eterm)  g_runs [i].r_winid = my.win;
       }
    }
    /*---(update data)--------------------*/
    rc = yX11_reset ();
    /*---(walk windows)-------------------*/
-   rc = yX11_win_by_name (YDLST_HEAD, &x_id, &x_desk, x_title, &x_type, &x_curr, &x_left, &x_topp, &x_scrn, &x_locn, &x_wide, &x_tall, &x_size);
+   rc = yX11_win_by_cursor (YDLST_HEAD, &x_id, &x_desk, x_title, &x_type, &x_curr, &x_left, &x_topp, &x_scrn, &x_locn, &x_wide, &x_tall, &x_size);
    while (rc >= 0) {
       /*> printf ("  %1d  %-100.100s  %c %c  %4d %4d %c %c %4d %4d %c\n", x_desk, x_title, x_type, x_curr, x_left, x_topp, x_scrn, x_locn, x_wide, x_tall, x_size);   <*/
-      i = RUN_by_ref (x_id);
+      i = RUN_by_winid (x_id);
       if (i >= 0) {
-         g_runs [i].desk = x_desk;
-         ystrlcpy (g_runs [i].title, x_title, LEN_HUND);
-         g_runs [i].left = x_left;
-         g_runs [i].topp = x_topp;
-         g_runs [i].scrn = x_scrn;
-         g_runs [i].locn = x_locn;
-         g_runs [i].wide = x_wide;
-         g_runs [i].tall = x_tall;
-         g_runs [i].size = x_size;
+         g_runs [i].r_desk = x_desk;
+         ystrlcpy (g_runs [i].r_title, x_title, LEN_HUND);
+         g_runs [i].r_left = x_left;
+         g_runs [i].r_topp = x_topp;
+         g_runs [i].r_scrn = x_scrn;
+         g_runs [i].r_locn = x_locn;
+         g_runs [i].r_wide = x_wide;
+         g_runs [i].r_tall = x_tall;
+         g_runs [i].r_size = x_size;
       }
-      rc = yX11_win_by_name (YDLST_NEXT, &x_id, &x_desk, x_title, &x_type, &x_curr, &x_left, &x_topp, &x_scrn, &x_locn, &x_wide, &x_tall, &x_size);
+      rc = yX11_win_by_cursor (YDLST_NEXT, &x_id, &x_desk, x_title, &x_type, &x_curr, &x_left, &x_topp, &x_scrn, &x_locn, &x_wide, &x_tall, &x_size);
    }
    /*---(stacking order)-----------------*/
    rc = RUN__stacking ('-');
    /*---(classify)-----------------------*/
    for (i = 0; i < g_nrun; ++i) {
-      g_runs [i].type = RUN__classify (g_runs [i].title, g_runs [i].pubname, g_runs [i].cmdline, g_runs [i].shortcut);
+      g_runs [i].r_type = RUN__classify (g_runs [i].r_title, g_runs [i].r_pubname, g_runs [i].r_cmdline, g_runs [i].r_terse);
    }
    /*---(complete)-----------------------*/
    DEBUG_FILE   yLOG_exit    (__FUNCTION__);
@@ -601,31 +623,33 @@ RUN_write             (cchar a_name [LEN_PATH])
    fprintf (f, "\n");
    /*---(read terminal)------------------*/
    for (i = 0; i < g_nrun; ++i) {
-      if (i % 5 == 0)  fprintf (f, "#-epid  -back-  fg  ---ref---  st  d  ---title--------------------------------------------------------------------------------------------  t  ---shortcut---------  left  topp  s  l  wide  tall  z \n");
-      if (g_runs [i].ref == 0)  strcpy (t, "·");
+      if (i % 5 == 0)  fprintf (f, "#-epid  -back-  fg  ---ref---  st  d  ---title--------------------------------------------------------------------------------------------  t  ---terse------------  left  topp  s  l  wide  tall  z \n");
+      if (g_runs [i].r_winid == 0)  strcpy (t, "·");
       else {
-         ystrl4hex (g_runs [i].ref, t, 4, 'x', LEN_LABEL);
+         ystrl4hex (g_runs [i].r_winid, t, 4, 'x', LEN_LABEL);
          ystrldchg (t, '0', '·', LEN_LABEL);
          if (t [3] == '·')  t [3] = '0';
       }
-      if (g_runs [i].stack == -1)  strcpy (s, " ·");
-      else                         sprintf (s, "%2d", g_runs [i].stack);
+      if (g_runs [i].r_stack == -1)  strcpy (s, " ·");
+      else                         sprintf (s, "%2d", g_runs [i].r_stack);
       fprintf (f, "%-6d  %-6.6s  %-2.2s  %-9.9s  %-2.2s  %1d  %-100.100s  %c  %-20.20s  %4d  %4d  %c  %c  %4d  %4d  %c  %6d  %-10.10s  %s \n",
-            g_runs [i].eterm, g_runs [i].back , g_runs [i].fore , t,
-            s               , g_runs [i].desk , g_runs [i].title, g_runs [i].type , g_runs [i].shortcut ,
-            g_runs [i].left , g_runs [i].topp , g_runs [i].scrn , g_runs [i].locn ,
-            g_runs [i].wide , g_runs [i].tall , g_runs [i].size ,
-            g_runs [i].use  , g_runs [i].pubname, g_runs [i].cmdline);
+            g_runs [i].r_eterm, g_runs [i].r_back , g_runs [i].r_fore , t,
+            s               , g_runs [i].r_desk , g_runs [i].r_title, g_runs [i].r_type , g_runs [i].r_terse ,
+            g_runs [i].r_left , g_runs [i].r_topp , g_runs [i].r_scrn , g_runs [i].r_locn ,
+            g_runs [i].r_wide , g_runs [i].r_tall , g_runs [i].r_size ,
+            g_runs [i].r_use  , g_runs [i].r_pubname, g_runs [i].r_cmdline);
    }
    /*---(file footer)--------------------*/
    fprintf (f, "\n");
    fprintf (f, "## end-of-file.  %d lines.  done, finito, completare, whimper [Ï´···\n", i);
    /*---(close file)---------------------*/
+   fflush (f);
    rc = fclose (f);
    --rce;  if (rc != 0) {
       DEBUG_FILE   yLOG_exit    (__FUNCTION__);
       return rce;
    }
+   /*> sync ();                                                                       <*/
    /*---(complete)-----------------------*/
    DEBUG_FILE   yLOG_exit    (__FUNCTION__);
    /*---(complete)-----------------------*/
@@ -638,6 +662,23 @@ RUN_write             (cchar a_name [LEN_PATH])
 /*===----                      unit test accessor                      ----===*/
 /*====================------------------------------------====================*/
 static void      o___UNITTEST________________o (void) {;}
+
+char
+RUN__unit_force         (short a_eterm, char a_hint [LEN_SHORT], char a_back [LEN_TERSE], char a_fore [LEN_TERSE], char a_hex [LEN_TERSE], char a_terse [LEN_LABEL])
+{
+   double      v           =  0.0;
+   g_runs [g_nrun].r_eterm = a_eterm;
+   ystrlcpy  (g_runs [g_nrun].r_hint , a_hint , LEN_SHORT);
+   ystrlcpy  (g_runs [g_nrun].r_back , a_back , LEN_TERSE);
+   ystrlcpy  (g_runs [g_nrun].r_fore , a_fore , LEN_TERSE);
+   ystrlcpy  (g_runs [g_nrun].r_hex  , a_hex  , LEN_TERSE);
+   ystrldchg (g_runs [g_nrun].r_hex, '0', '·' , LEN_TERSE);
+   ystrl2hex (a_hex, &v, LEN_TERSE);
+   g_runs [g_nrun].r_winid = v;
+   ystrlcpy  (g_runs [g_nrun].r_terse, a_terse, LEN_LABEL);
+   ++g_nrun;
+   return 0;
+}
 
 char*            /*--> unit test accessor ------------------------------*/
 RUN__unit               (char *a_question, int n)
@@ -652,9 +693,9 @@ RUN__unit               (char *a_question, int n)
       snprintf (unit_answer, LEN_HUND, "RUN count        : %d", g_nrun);
    }
    else if (strcmp (a_question, "entry"   )        == 0) {
-      if (g_runs [n].stack >= 0)  sprintf (t, "%2d", g_runs [n].stack);
-      else                        strcpy  (t, " ·");
-      snprintf (unit_answer, LEN_HUND, "RUN entry   (%2d) : %-6d  %-6.6s  %-2.2s  %-9.9s  %-2.2s  %-12.12s  %ld", n, g_runs [n].eterm, g_runs [n].back, g_runs [n].fore, g_runs [n].hex, t, g_runs [n].shortcut, g_runs [n].ref);
+      if (g_runs [n].r_stack >= 0)  sprintf (t, "%2d", g_runs [n].r_stack);
+      else                          strcpy  (t, " ·");
+      snprintf (unit_answer, LEN_HUND, "RUN entry   (%2d) : %-6d  %-2.2s  %-6.6s  %-2.2s  %-9.9s  %-2.2s  %-12.12s  %ld", n, g_runs [n].r_eterm, g_runs [n].r_hint, g_runs [n].r_back, g_runs [n].r_fore, g_runs [n].r_hex, t, g_runs [n].r_terse, g_runs [n].r_winid);
    }
    /*---(complete)-----------------------*/
    return unit_answer;

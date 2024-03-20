@@ -313,33 +313,33 @@ PAGE__print             (char a_ygrid, char a_desk, char a_total, char a_here)
       for (i = 0; i < g_nrun; ++i) {
          n = FIFO_by_stack (i);
          if (n < 0)  continue;
-         if (g_runs [n].desk != a_desk)  continue;
-         if (g_runs [n].scrn != 't')     continue;
+         if (g_runs [n].r_desk != a_desk)  continue;
+         if (g_runs [n].r_scrn != 't')     continue;
          if (x_first == '-') {
             printf ("\n\n");
             printf ("## --) ---top------  st --x--  --y--  --w--  --t--  ---window-title--------------------\n");
             x_first = 'y';
          }
          printf ("## %2d) %-12.12s  %2d  %4d   %4d   %4d   %4d   %-35.35s\n",
-               g_runs [n].order, g_runs [n].shortcut, g_runs [n].stack,
-               g_runs [n].left, g_runs [n].topp, g_runs [n].wide, g_runs [n].tall,
-               g_runs [n].title);
+               g_runs [n].r_order, g_runs [n].r_terse, g_runs [n].r_stack,
+               g_runs [n].r_left, g_runs [n].r_topp, g_runs [n].r_wide, g_runs [n].r_tall,
+               g_runs [n].r_title);
       }
       x_first = '-';
       for (i = 0; i < g_nrun; ++i) {
          n = FIFO_by_stack (i);
          if (n < 0)  continue;
-         if (g_runs [n].desk != a_desk)  continue;
-         if (g_runs [n].scrn != 'b')     continue;
+         if (g_runs [n].r_desk != a_desk)  continue;
+         if (g_runs [n].r_scrn != 'b')     continue;
          if (x_first == '-') {
             printf ("\n\n");
             printf ("## --) ---top------  st --x--  --y--  --w--  --t--  ---window-title--------------------\n");
             x_first = 'y';
          }
          printf ("## %2d) %-12.12s  %2d  %4d   %4d   %4d   %4d   %-35.35s\n",
-               g_runs [n].order, g_runs [n].shortcut, g_runs [n].stack,
-               g_runs [n].left, g_runs [n].topp, g_runs [n].wide, g_runs [n].tall,
-               g_runs [n].title);
+               g_runs [n].r_order, g_runs [n].r_terse, g_runs [n].r_stack,
+               g_runs [n].r_left, g_runs [n].r_topp, g_runs [n].r_wide, g_runs [n].r_tall,
+               g_runs [n].r_title);
       }
    }
    if (my.extra == 'y') {
@@ -561,22 +561,22 @@ PAGE__deskplace         (char d, char *a_title, short y, short x)
    } else {
       for (i = 0; i < l; ++i)       s_desk [y + s_ynewc][x + 3 + i] = t [i];
    }
-   for (i = 0; i < g_nrun; ++i)  g_runs [i].order = -1;
+   for (i = 0; i < g_nrun; ++i)  g_runs [i].r_order = -1;
    for (i = 0; i < g_nrun; ++i) {
       n = FIFO_by_stack (i);
       if (n < 0)  continue;
       if (c > x_all)  x_all = c;
-      if (g_runs [n].desk != d)  continue;
+      if (g_runs [n].r_desk != d)  continue;
       if (c > x_max)  x_max = c;
-      g_runs [n].order = c;
+      g_runs [n].r_order = c;
       ++c;
    }
    for (i = 0; i < g_nrun; ++i) {
       n = FIFO_by_stack (i);
       if (n < 0)  continue;
-      if (g_runs [n].desk != d)  continue;
-      /*> if (g_runs [n].order == 2) continue;                                        <*/
-      PAGE__place (y, x, x_all, x_max, g_runs [n].order, g_runs[n].left, g_runs[n].topp, g_runs[n].wide, g_runs[n].tall);
+      if (g_runs [n].r_desk != d)  continue;
+      /*> if (g_runs [n].r_order == 2) continue;                                        <*/
+      PAGE__place (y, x, x_all, x_max, g_runs [n].r_order, g_runs[n].r_left, g_runs[n].r_topp, g_runs[n].r_wide, g_runs[n].r_tall);
    }
    sprintf (t, "%dw", c);
    l = strlen (t);
