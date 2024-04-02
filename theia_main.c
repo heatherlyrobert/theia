@@ -23,6 +23,11 @@ main               (int a_argc, char *a_argv [])
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   if (rc == 1) {
+      PROG_shutdown  ();
+      DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+      return 1;
+   }
    /*---(pre-run)------------------------*/
    rc = PROG_dawn    ();
    DEBUG_PROG   yLOG_value    ("dawn"      , rc);

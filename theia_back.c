@@ -209,6 +209,9 @@ BACK_report        (FILE *f)
    fprintf (f, "## usage : theia <b>\n");
    fprintf (f, "##    where <b> is the single/double letter listed in the first column\n");
    fprintf (f, "##\n");
+   fprintf (f, "##    $ theia f¦      ## sets background as f =forest green\n");
+   fprintf (f, "##    $ theia c-¦     ## sets background as f =darker crimson\n");
+   fprintf (f, "##\n");
    fprintf (f, "## the normal base back colors are nearly always enough, but\n");
    fprintf (f, "## having used this for many years, i created the variants\n");
    fprintf (f, "## for contrast and to adjust for lighter and darker desktops\n");

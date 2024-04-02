@@ -196,6 +196,67 @@ FORE_set           (cchar a_abbr [LEN_TERSE])
 
 
 /*====================------------------------------------====================*/
+/*===----                      reporting/output                        ----===*/
+/*====================------------------------------------====================*/
+static void      o___OUTPUT__________________o (void) {;}
+
+char
+FORE_report        (FILE *f)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   int         i           =    0;
+   int         c           =    0;
+   char        x_curr      [LEN_TERSE] = "";
+   char        x_save      [LEN_TERSE] = "";
+   /*---(header)-------------------------*/
+   fprintf (f, "## %s\n", P_ONELINE);
+   fprintf (f, "##   inventory of possible eterm foreground/font color schemes\n");
+   fprintf (f, "##\n");
+   fprintf (f, "## usage : theia <f>\n");
+   fprintf (f, "##    where <f> is the double letter listed in the first column\n");
+   fprintf (f, "##\n");
+   fprintf (f, "##    $ theia f¦      ## sets background as f =forest green\n");
+   fprintf (f, "##    $ theia c-¦     ## sets background as f =darker crimson\n");
+   fprintf (f, "##\n");
+   fprintf (f, "## the normal base back colors are nearly always enough, but\n");
+   fprintf (f, "## having used this for many years, i created the variants\n");
+   fprintf (f, "## for contrast and to adjust for lighter and darker desktops\n");
+   /*---(inventory)----------------------*/
+   fprintf (f, "\n##===[[ BASE BACK COLORS]]==========================#\n");
+   fprintf (f, "\n##  terse-   ---name-------------  --hex--  ---val---\n");
+   c = 0;
+   for (i = 0; i < g_nback; ++i) {
+      if (g_backs [i].b_terse [5] != '·')   continue;
+      if (c %  5 == 0)                    fprintf (f, "\n");
+      fprintf (f, "%-2.2s  %-6.6s   %-20.20s  %-7.7s  %9d\n",
+            g_backs [i].b_abbr , g_backs [i].b_terse,
+            g_backs [i].b_name , g_backs [i].b_hex  , g_backs [i].b_value);
+      ++c;
+   }
+   fprintf (f, "\n## %d bases\n\n", c);
+   /*---(inventory)----------------------*/
+   fprintf (f, "\n##===[[ BACK VARIATIONS ]]==========================#\n");
+   c = 0;
+   for (i = 0; i < g_nback; ++i) {
+      sprintf (x_curr, "%5.5s", g_backs [i].b_terse);
+      if (c % 25 == 0)                    fprintf (f, "\n##  terse-   ---name-------------  --hex--  ---val---\n");
+      if (strcmp (x_curr, x_save) != 0)   fprintf (f, "\n");
+      fprintf (f, "%-2.2s  %-6.6s   %-20.20s  %-7.7s  %9d\n",
+            g_backs [i].b_abbr , g_backs [i].b_terse,
+            g_backs [i].b_name , g_backs [i].b_hex  , g_backs [i].b_value);
+      ++c;
+      ystrlcpy (x_save, x_curr, LEN_TERSE);
+   }
+   fprintf (f, "\n## %d bases plus variants\n\n", c);
+   /*---(footer)-------------------------*/
+   fprintf (f, "## end-of-data.  done, finito, completare, whimper [Ï´···\n");
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+
+
+/*====================------------------------------------====================*/
 /*===----                      unit test accessor                      ----===*/
 /*====================------------------------------------====================*/
 static void      o___UNITTEST________________o (void) {;}

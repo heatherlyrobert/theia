@@ -14,6 +14,39 @@ int    g_crun      =    0;
 static void      o___PROGRAM_________________o (void) {;}
 
 char
+RUN_clear               (char i)
+{
+   /*---(eterm)----------*/
+   g_runs [i].r_eterm   =  0;
+   ystrlcpy (g_runs [i].r_back , "·", LEN_TERSE);
+   ystrlcpy (g_runs [i].r_fore , "·", LEN_TERSE);
+   /*---(window)---------*/
+   ystrlcpy (g_runs [i].r_hex  , "·", LEN_LABEL);
+   g_runs [i].r_winid   =  0;
+   g_runs [i].r_stack   = -1;
+   g_runs [i].r_desk    =  0;
+   ystrlcpy (g_runs [i].r_title, "·", LEN_HUND);
+   g_runs [i].r_type    = '·';
+   ystrlcpy (g_runs [i].r_terse    , "·", LEN_LABEL);
+   ystrlcpy (g_runs [i].r_hint     , "·", LEN_SHORT);
+   /*---(position)-------*/
+   g_runs [i].r_left    =  0;
+   g_runs [i].r_topp    =  0;
+   g_runs [i].r_wide    =  0;
+   g_runs [i].r_tall    =  0;
+   g_runs [i].r_size    = '·';
+   g_runs [i].r_scrn    = '·';
+   g_runs [i].r_locn    = '·';
+   /*---(running)--------*/
+   g_runs [i].r_use       =  0;
+   ystrlcpy (g_runs [i].r_pubname, "·", LEN_LABEL);
+   ystrlcpy (g_runs [i].r_cmdline, "·", LEN_RECD);
+   g_runs [i].r_order     =  0;
+   /*---(done)-----------*/
+   return 0;
+}
+
+char
 RUN_purge               (void)
 {
    /*---(locals)-----------+-----+-----+-*/
@@ -22,33 +55,34 @@ RUN_purge               (void)
    DEBUG_CONF   yLOG_senter  (__FUNCTION__);
    /*---(clear table)--------------------*/
    for (i = 0; i < MAX_RUN; ++i)  {
-      /*---(eterm)----------*/
-      g_runs [i].r_eterm   =  0;
-      ystrlcpy (g_runs [i].r_back , "·", LEN_TERSE);
-      ystrlcpy (g_runs [i].r_fore , "·", LEN_TERSE);
-      /*---(window)---------*/
-      ystrlcpy (g_runs [i].r_hex  , "·", LEN_LABEL);
-      g_runs [i].r_winid   =  0;
-      g_runs [i].r_stack   = -1;
-      g_runs [i].r_desk    =  0;
-      ystrlcpy (g_runs [i].r_title, "·", LEN_HUND);
-      g_runs [i].r_type    = '·';
-      ystrlcpy (g_runs [i].r_terse    , "·", LEN_LABEL);
-      ystrlcpy (g_runs [i].r_hint     , "·", LEN_SHORT);
-      /*---(position)-------*/
-      g_runs [i].r_left    =  0;
-      g_runs [i].r_topp    =  0;
-      g_runs [i].r_wide    =  0;
-      g_runs [i].r_tall    =  0;
-      g_runs [i].r_size    = '·';
-      g_runs [i].r_scrn    = '·';
-      g_runs [i].r_locn    = '·';
-      /*---(running)--------*/
-      g_runs [i].r_use       =  0;
-      ystrlcpy (g_runs [i].r_pubname, "·", LEN_LABEL);
-      ystrlcpy (g_runs [i].r_cmdline, "·", LEN_RECD);
-      g_runs [i].r_order     =  0;
-      /*---(done)-----------*/
+      RUN_clear (i);
+      /*> /+---(eterm)----------+/                                                    <* 
+       *> g_runs [i].r_eterm   =  0;                                                  <* 
+       *> ystrlcpy (g_runs [i].r_back , "·", LEN_TERSE);                              <* 
+       *> ystrlcpy (g_runs [i].r_fore , "·", LEN_TERSE);                              <* 
+       *> /+---(window)---------+/                                                    <* 
+       *> ystrlcpy (g_runs [i].r_hex  , "·", LEN_LABEL);                              <* 
+       *> g_runs [i].r_winid   =  0;                                                  <* 
+       *> g_runs [i].r_stack   = -1;                                                  <* 
+       *> g_runs [i].r_desk    =  0;                                                  <* 
+       *> ystrlcpy (g_runs [i].r_title, "·", LEN_HUND);                               <* 
+       *> g_runs [i].r_type    = '·';                                                 <* 
+       *> ystrlcpy (g_runs [i].r_terse    , "·", LEN_LABEL);                          <* 
+       *> ystrlcpy (g_runs [i].r_hint     , "·", LEN_SHORT);                          <* 
+       *> /+---(position)-------+/                                                    <* 
+       *> g_runs [i].r_left    =  0;                                                  <* 
+       *> g_runs [i].r_topp    =  0;                                                  <* 
+       *> g_runs [i].r_wide    =  0;                                                  <* 
+       *> g_runs [i].r_tall    =  0;                                                  <* 
+       *> g_runs [i].r_size    = '·';                                                 <* 
+       *> g_runs [i].r_scrn    = '·';                                                 <* 
+       *> g_runs [i].r_locn    = '·';                                                 <* 
+       *> /+---(running)--------+/                                                    <* 
+       *> g_runs [i].r_use       =  0;                                                <* 
+       *> ystrlcpy (g_runs [i].r_pubname, "·", LEN_LABEL);                            <* 
+       *> ystrlcpy (g_runs [i].r_cmdline, "·", LEN_RECD);                             <* 
+       *> g_runs [i].r_order     =  0;                                                <* 
+       *> /+---(done)-----------+/                                                    <*/
    }
    g_nrun  = 0;
    /*---(header)-------------------------*/
@@ -135,6 +169,31 @@ RUN_by_hint             (cchar a_hint [LEN_TERSE])
    return --rce;
 }
 
+char
+RUN_by_sticky           (char a_ref [LEN_LABEL])
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   int         i           =    0;
+   char        x_recd      [LEN_RECD]  = "";
+   /*---(find back)----------------------*/
+   printf ("g_nrun %d\n", g_nrun);
+   for (i = 0; i < g_nrun; ++i) {
+      printf ("reviewing %2d %-10.10X %2d\n", i, g_runs [i].r_winid, g_runs [i].r_desk);
+      if (g_runs  [i].r_desk  >=  0)  continue;
+      if (g_runs  [i].r_winid ==  0)  continue;
+      printf ("FOUND\n");
+      sprintf (x_recd, "wmctrl -i -c %s  2>&1 > /dev/null", a_ref);
+      system (x_recd);
+      sprintf (x_recd, "wmctrl -i -a 0x%-8.8x  2>&1 > /dev/null", g_runs [i].r_winid);
+      printf ("%s\n", x_recd);
+      system (x_recd);
+      return i;
+   }
+   /*---(complete)-----------------------*/
+   return --rce;
+}
+
 
 
 /*====================------------------------------------====================*/
@@ -162,6 +221,7 @@ RUN_handler             (cchar a_match, cchar a_recd [LEN_RECD])
    char        x_hex       [LEN_LABEL] = "·";
    long        x_ref       =    0;
    char        x_stack     =   -1;
+   char        x_desk      =   -1;
    char        x_exist     =    0;
    /*---(header)-------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
@@ -248,6 +308,14 @@ RUN_handler             (cchar a_match, cchar a_recd [LEN_RECD])
          x_stack = atoi (x_field);
          DEBUG_CONF   yLOG_value   ("x_stack"   , x_stack);
          break;
+      case  5 :  /* desktop              */
+         if (l == 0 || strcmp (x_field, "·") == 0) {
+            DEBUG_CONF   yLOG_note    ("default value");
+            break;
+         }
+         x_desk  = atoi (x_field);
+         DEBUG_CONF   yLOG_value   ("x_desk"    , x_desk);
+         break;
       }
       if (rc < 0)  break;
       ++c;
@@ -276,6 +344,8 @@ RUN_handler             (cchar a_match, cchar a_recd [LEN_RECD])
       DEBUG_CONF   yLOG_value   ("r_winid"   , g_runs [n].r_winid);
       g_runs [n].r_stack = x_stack;
       DEBUG_CONF   yLOG_value   ("r_stack"   , g_runs [n].r_stack);
+      g_runs [n].r_desk  = x_desk;
+      DEBUG_CONF   yLOG_value   ("r_desk"    , g_runs [n].r_desk);
    }
    /*---(advance)---------------------*/
    if (n == g_nrun)  ++g_nrun;
@@ -623,7 +693,7 @@ RUN_write             (cchar a_name [LEN_PATH])
    fprintf (f, "\n");
    /*---(read terminal)------------------*/
    for (i = 0; i < g_nrun; ++i) {
-      if (i % 5 == 0)  fprintf (f, "#-epid  -back-  fg  ---ref---  st  d  ---title--------------------------------------------------------------------------------------------  t  ---terse------------  left  topp  s  l  wide  tall  z \n");
+      if (i % 5 == 0)  fprintf (f, "#-epid  -back-  fg  ---ref---  st  dt  ---title--------------------------------------------------------------------------------------------  t  ---terse------------  left  topp  s  l  wide  tall  z \n");
       if (g_runs [i].r_winid == 0)  strcpy (t, "·");
       else {
          ystrl4hex (g_runs [i].r_winid, t, 4, 'x', LEN_LABEL);
@@ -632,7 +702,7 @@ RUN_write             (cchar a_name [LEN_PATH])
       }
       if (g_runs [i].r_stack == -1)  strcpy (s, " ·");
       else                         sprintf (s, "%2d", g_runs [i].r_stack);
-      fprintf (f, "%-6d  %-6.6s  %-2.2s  %-9.9s  %-2.2s  %1d  %-100.100s  %c  %-20.20s  %4d  %4d  %c  %c  %4d  %4d  %c  %6d  %-10.10s  %s \n",
+      fprintf (f, "%-6d  %-6.6s  %-2.2s  %-9.9s  %-2.2s  %2d  %-100.100s  %c  %-20.20s  %4d  %4d  %c  %c  %4d  %4d  %c  %6d  %-10.10s  %s \n",
             g_runs [i].r_eterm, g_runs [i].r_back , g_runs [i].r_fore , t,
             s               , g_runs [i].r_desk , g_runs [i].r_title, g_runs [i].r_type , g_runs [i].r_terse ,
             g_runs [i].r_left , g_runs [i].r_topp , g_runs [i].r_scrn , g_runs [i].r_locn ,

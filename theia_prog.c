@@ -193,6 +193,7 @@ PROG__args              (int a_argc, char *a_argv [])
       ++x_args;
       /*---(reporting)-------------------*/
       if      (strcmp (a, "--identify") == 0)    my.identify = 'y';
+      else if (strcmp (a, "--close"   ) == 0)    my.identify = 'x';
       /*> else if (strcmp (a, "-w"        ) == 0)    my.report   = 'w';               <*/
       /*> else if (strcmp (a, "--wide"    ) == 0)    my.report = 'w';                 <* 
        *> else if (strcmp (a, "-e"        ) == 0)    my.report = 'e';                 <* 
@@ -286,10 +287,12 @@ PROG__begin             (void)
    char       *p           = NULL;
    FILE       *f           = NULL;
    int         l           =    0;
+   int         n           =   -1;
    /*---(begin)--------------------------*/
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    /*---(new terminal action)------------*/
-   if (my.identify != '·') {
+   if (my.identify == 'y') {
+      printf ("identifying\n");
       system ("wmctrl -l -G | grep \"Eterm 0.9.7\" | grep \"0    0    .... 20  \" > /tmp/theia.txt");
       c = yURG_peek_count (x_file);
       if (c > 0)  f = fopen (x_file, "rt");
@@ -311,11 +314,56 @@ PROG__begin             (void)
                sprintf (my.back_req, "%c", (c - 592) / 6 + 'a');
                printf ("   back      %s\n", my.back_req);
             }
-            sprintf (x_recd, "wmctrl -i -r %s -e 0,150,100,529,383 2>&1 > /dev/null", x_ref);
+            if (strcmp (my.back_req, "z") == 0) {
+               rc = RUN_read  (FILE_RUNTIME);
+               printf ("read %d\n", rc);
+               DEBUG_PROG   yLOG_value   ("read"      , rc);
+               n  = RUN_by_sticky (x_ref);
+               printf ("sticky %d\n", n);
+               DEBUG_PROG   yLOG_value   ("n"         , n);
+               if (n >= 0) {
+                  DEBUG_PROG   yLOG_note    ("already exists");
+                  DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+                  return 1;
+               }
+               RUN_purge ();
+               strcpy (my.back_req, "k");
+               sprintf (x_recd, "wmctrl -i -r %s -e 0,350,720,709,30  2>&1 > /dev/null", x_ref);
+               system (x_recd);
+               sprintf (x_recd, "wmctrl -i -r %s -b add,sticky        2>&1 > /dev/null", x_ref);
+               system (x_recd);
+               sprintf (x_recd, "wmctrl -i -r %s -b add,above         2>&1 > /dev/null", x_ref);
+               printf ("system window\n");
+            } else {
+               sprintf (x_recd, "wmctrl -i -r %s -e 0,150,100,529,383 2>&1 > /dev/null", x_ref);
+            }
             system (x_recd);
          }
       }
       ystrlcpy (my.fore_req, "95", LEN_TERSE);
+   }
+   if (my.identify == 'x') {
+      DEBUG_PROG   yLOG_note    ("updating after close of eterm window");
+      rc = RUN_read  (FILE_RUNTIME);
+      rc = yEXEC_find_my_eterm (getpid (), &(my.eterm));
+      DEBUG_PROG   yLOG_value    ("my_eterm"  , rc);
+      --rce;  if (rc < 0) {
+         DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);
+         return rce;
+      }
+      DEBUG_PROG   yLOG_value    ("eterm"     , my.eterm);
+      rc = RUN_by_eterm (my.eterm);
+      DEBUG_PROG   yLOG_value    ("by_eterm"  , rc);
+      --rce;  if (rc < 0) {
+         DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);
+         return rce;
+      }
+      n = rc;
+      rc = RUN_clear  (n);
+      rc = RUN_gather ();
+      rc = RUN_write (FILE_RUNTIME);
+      DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+      return 1;
    }
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);

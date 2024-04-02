@@ -6,7 +6,7 @@
 #define     P_FOCUS     "WM (window_manager)"
 #define     P_NICHE     "tc (terminal_configuration)"
 #define     P_SUBJECT   "eterm configuration and tracking"
-#define     P_PURPOSE   "configuration and tracking for terminal windows"
+#define     P_PURPOSE   "aesthetic configuration and tracking for terminal windows"
 /*········· ··········· ´·····························´········································*/
 #define     P_NAMESAKE  "theia-euryphaessa (wide-shinning)"
 #define     P_PRONOUCE  "thee·uh yur·ee·fray·shee·uh"
@@ -38,8 +38,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "1.--, running every day in production"
 #define     P_VERMINOR  "1.0-, changed from hack to maintainable program."
-#define     P_VERNUM    "1.0f"
-#define     P_VERTXT    "overhaul to be more dependable and unit tested color changes in eterm"
+#define     P_VERNUM    "1.0g"
+#define     P_VERTXT    "handles win closure and special system window"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -309,12 +309,14 @@ char*       FORE__unit              (char *a_question, int n);
 /*===[[ theia_run.c ]]========================================================*/
 /*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
 /*---(program)--------------*/
+char        RUN_clear               (char i);
 char        RUN_purge               (void);
 /*---(search)---------------*/
 char        RUN_by_eterm            (short a_eterm);
 char        RUN_by_winid            (long a_winid);
 char        RUN_by_terse            (cchar a_terse [LEN_LABEL]);
 char        RUN_by_hint             (cchar a_hint [LEN_TERSE]);
+char        RUN_by_sticky           (char a_ref [LEN_LABEL]);
 /*---(create)---------------*/
 char        RUN_handler             (cchar a_match, cchar a_recd [LEN_RECD]);
 /*---(exim)-----------------*/
