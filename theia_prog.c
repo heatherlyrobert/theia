@@ -294,7 +294,7 @@ PROG__begin             (void)
    if (my.identify == 'y') {
       printf ("identifying\n");
       system ("wmctrl -l -G | grep \"Eterm 0.9.7\" | grep \"0    0    .... 20  \" > /tmp/theia.txt");
-      c = yURG_peek_count (x_file);
+      c = yURG_lines (x_file);
       if (c > 0)  f = fopen (x_file, "rt");
       if (f != NULL) {
          printf ("theia --identify\n");

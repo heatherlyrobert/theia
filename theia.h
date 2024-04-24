@@ -38,8 +38,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "1.--, running every day in production"
 #define     P_VERMINOR  "1.0-, changed from hack to maintainable program."
-#define     P_VERNUM    "1.0g"
-#define     P_VERTXT    "handles win closure and special system window"
+#define     P_VERNUM    "1.0h"
+#define     P_VERTXT    "updated for yURG testing and cleanup"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
